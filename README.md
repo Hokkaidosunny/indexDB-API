@@ -1,9 +1,12 @@
 <!-- 自行脑补英文翻译 -->
 doc：
 
-新建一个db： 
-var myDB = new Index('adc'); 
-'abc'-->DB名字
+<p>新建一个db：</p> 
+<pre><code>
+	var myDB = new Index('adc'); 
+	'abc'-->DB名字
+</code></pre>
+
 
 打开这个db： 
 myDB.openDB({
