@@ -1,11 +1,11 @@
 <!-- 自行脑补英文翻译 -->
 doc：
 
-新建一个db： 
+>新建一个db： 
 var myDB = new Index('adc'); 
 'abc'-->DB名字
 
-打开这个db： 
+>打开这个db： 
 myDB.openDB({
 	success:function(){},  -->成功打开回调
 	error:function(){}		-->打开失败回调
