@@ -36,6 +36,7 @@
     "rollup-plugin-node-resolve": "^2.0.0"
   },
   "dependencies": {
+    "es6-promise": "^4.0.3",
     "object-assign": "^4.1.0"
   }
 }
