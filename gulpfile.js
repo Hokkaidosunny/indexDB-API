@@ -11,11 +11,12 @@ gulp.task('rollup', function() {
       nodeResolve({ jsnext: true, main:true, browser: true }),
       commonjs(),
       babel()
-    ]
+    ],
+    moduleName: 'IndexDB'
   }).then(function (bundle) {
     bundle.write({
       dest: "dist/indexdb.bundle.js",
-      format: "iife"
+      format: "umd"
     });
   })
 });
