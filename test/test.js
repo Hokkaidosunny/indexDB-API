@@ -1,5 +1,5 @@
 mocha.ui('bdd');
-mocha.timeout(10000);
+mocha.timeout(600000);
 
 var expect = chai.expect;
 
@@ -78,6 +78,23 @@ describe('getStore', function() {
       myDB.openDB('abc').then(function(db){
         var store_users = myDB.getStore(db, 'users');
         expect(store_users instanceof IDBObjectStore).equal(true);
+        done();
+      }).catch(function(err){
+        expect(err instanceof Error).equal(true);
+        done();
+      })
+    });
+  });
+});
+
+
+describe('getStoreCount', function() {
+  describe('get store "users" data count in db "abc"', function() {
+    it('should return the store "users" data count', function(done) {
+      myDB.openDB('abc').then(function(db){
+        return myDB.getStoreCount(db, 'users');
+      }).then(function(count){
+        expect(typeof count).equal('number');
         done();
       }).catch(function(err){
         expect(err instanceof Error).equal(true);
