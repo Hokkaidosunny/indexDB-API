@@ -3,7 +3,7 @@ import commonjs from 'rollup-plugin-commonjs';
 import nodeResolve from 'rollup-plugin-node-resolve';
 
 export default {
-  entry: 'lib/indexdb.js',
+  entry: 'lib/index.js',
   format: 'umd',
   sourceMap: 'inline',
   plugins: [
@@ -16,7 +16,8 @@ export default {
         "loose": true
       }]],
       plugins: [
-        "external-helpers"
+        "external-helpers",
+        "transform-object-rest-spread"
       ]
     })
   ],
