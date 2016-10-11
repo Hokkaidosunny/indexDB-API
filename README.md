@@ -1,99 +1,118 @@
-<!-- 自行脑补英文翻译 -->
-doc：
-<p>新建一个db：</p> 
-<pre><code>
-	var myDB = new Index('adc'); 
-	'abc'-->DB名字
-</code></pre>
+## Usage：
 
-打开这个db： 
-<pre><code>
-	myDB.openDB({
-		success:function(){},  -->成功打开回调
-		error:function(){}		-->打开失败回调
-	});
-</code></pre>
+### DB 
 
-新建一个对象库并打开这个db：
-<pre><code>
-myDB.createStore_openDB(storeOptions,callback);
-storeOptions={-->对象库配置项
-	name:'student',-->对象库名字
-	keyOptions:{
-		keyPath:'id',//主键
-		autoIncrement:false,//是否自增长
-	},
-	index:[  //索引项
-		{ indexName:'stu_id',indexKey:'id',indexOptions:{ unqiue:false,mulitEntry:false } },
-		{ indexName:'stu_name',indexKey:'name',indexOptions:{ unqiue:false,mulitEntry:false } },
-	]
-}
-callback={-->回调
-	success:function(){},  -->成功打开回调
-	error:function(){}		-->打开失败回调
-}
-</code></pre>
+#### get all db names
 
-添加数据：
-<pre><code>
-myDB.addData(storeName,data,[callback]);
-storeName-->对象库名字
-data-->object||array 添加的数据
-callback={-->回调 [可选]
-	success:function(){},  -->成功打开回调
-	error:function(){}		-->打开失败回调
-}
-</code></pre>
+```javascript
+IndexDB.getDBNames().then(function(dbNames){
+  //dbNames
+});
+```
+#### create a new db
 
-按key获取数据：
-<pre><code>
-myDB.getDataByKey(storeName,value,callback);
-storeName-->对象库名字
-value -->要搜索的key的值
-callback=function(data){ } data-->结果
-</code></pre>
+```javascript
+IndexDB.createDB(dbName, version).then(function(db){
+  //db
+});
+```
+> * dbName: string
+> * version: number, optional ,default to be `new Date().getTime()`
 
-按key删除数据
-<pre><code>
-myDB.deleteDataByKey(storeName,value);
-storeName-->对象库名字
-value -->要搜索的key的值
-</code></pre>
+#### open a existed db
 
-用key获取指定对象库的范围数据:
-<pre><code>
-myDB.getRangeDataByKey(storeName,start,end,callback);
-storeName-->对象库名字
-start-->key的起始值
-end-->key的结束值
-callback=function(data){ }  data-->array
-</code></pre>
+```javascript
+IndexDB.openDB(dbName, version).then(function(db){
+  //db
+});
+```
 
-获取所有数据
-<pre><code>
-myDB.getAllData(storeName,callback)
-storeName-->对象库名字
-callback=function(data){ }  data-->array
-</code></pre>
+> * dbName: string
+> * version: number, optional ,default to be `new Date().getTime()`
 
-清空对象库
-<pre><code>
-myDB.clearStore (storeName); storeName-->对象库名字
-</code></pre>
+### Object Store
 
-删除对象库
-<pre><code>
-myDB.deleteStore (storeName); storeName-->对象库名字
-</code></pre>
+#### create a new store
 
-关闭这个db：
-<pre><code>
-myDB.closeDB();
-</code></pre>
+```javascript
+/* example
+var opts = {
+  dbName: 'abc',
+  storeName: 'users',
+  keyOptions: {
+    keyPath:'id',//主键
+    autoIncrement: false,//是否自增长
+  },
+  index: [  //索引项
+    {indexName: 'stu_id', indexKey: 'id',indexOptions: {unqiue: false, mulitEntry: false}},
+    {indexName: 'stu_name', indexKey: 'name', indexOptions: {unqiue: false, mulitEntry: false}},
+  ]
+};
+*/
+var opts = {
+  dbName: <String>,
+  storeName: <String>,
+  version: <Number, optional>,
+  keyOptions: <Object, optional>,
+  index: <Array, optional>
+};
 
-删除db：
-<pre><code>
-deleteDB(name); name='abc' -->db名字
-</code></pre>
+IndexDB.createStore(opts).then(function(store){
+  //store
+});
+```
 
-....未完待续
+#### get store
+
+```javascript
+var store = IndexDB.getStore(db, storeName);
+```
+
+> * db: IDBDatabase instance
+> * storeName: String
+
+#### get data count in a store
+
+```javascript
+IndexDB.getStoreCount(db, storeName).then(function(count){
+  //count
+});
+```
+
+> * db: IDBDatabase instance
+> * storeName: String
+
+#### clear data
+
+```javascript
+IndexDB.clearStore(store);
+```
+
+> * store: IDBObjectStore instance
+
+#### delete store
+
+```javascript
+IndexDB.deleteStore(db, storeName);
+```
+
+> * db: IDBDatabase instance
+> * storeName: String
+
+### Data
+
+#### get all data in a store
+
+```javascript
+IndexDB.getAllData(store).then(function(dataArr){
+  //dataArr:<Array>
+});
+```
+
+> * store: IDBObjectStore instance
+
+#### get data by index
+
+
+
+> ….to be continue

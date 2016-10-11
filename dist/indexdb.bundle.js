@@ -23,7 +23,7 @@ function getDBNames() {
  * create a new db
  */
 function createDB(dbName) {
-  var version = arguments.length <= 1 || arguments[1] === undefined ? new Date().getTime() : arguments[1];
+  var version = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : new Date().getTime();
 
   return new Promise(function (resolve, reject) {
     getDBNames().then(function (dbNames) {
@@ -48,7 +48,7 @@ function createDB(dbName) {
  * open an existed db
  */
 function openDB(dbName) {
-  var version = arguments.length <= 1 || arguments[1] === undefined ? new Date().getTime() : arguments[1];
+  var version = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : new Date().getTime();
 
   return new Promise(function (resolve, reject) {
     getDBNames().then(function (dbNames) {

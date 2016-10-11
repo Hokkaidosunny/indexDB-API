@@ -3,7 +3,8 @@ mocha.timeout(600000);
 
 var expect = chai.expect;
 
-var myDB = new IndexDB();
+var myDB = IndexDB;
+
 
 describe('getDBNames', function() {
   describe('getDBNames function', function() {
