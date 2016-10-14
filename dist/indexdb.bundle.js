@@ -4,9 +4,11 @@
   (global.IndexDB = factory());
 }(this, (function () { 'use strict';
 
+var DBs = {};
+
 function getDBNames() {
   return new Promise(function (resolve, reject) {
-    var get_dbNames_req = indexedDB.webkitGetDatabaseNames();
+    var get_dbNames_req = window.indexedDB.webkitGetDatabaseNames();
 
     get_dbNames_req.onsuccess = function (event) {
       var dbNames = Array.prototype.slice.call(event.target.result);
@@ -27,6 +29,7 @@ function createDB(dbName) {
 
   return new Promise(function (resolve, reject) {
     getDBNames().then(function (dbNames) {
+      console.log(11);
       if (dbNames.indexOf(dbName) >= 0) {
         throw new Error("db " + dbName + " has existed");
       }
@@ -47,15 +50,24 @@ function createDB(dbName) {
 /**
  * open an existed db
  */
-function openDB(dbName) {
+function getDB(dbName) {
   var version = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : new Date().getTime();
 
   return new Promise(function (resolve, reject) {
     getDBNames().then(function (dbNames) {
       if (dbNames.indexOf(dbName) >= 0) {
+
+        for (let key in DBs) {
+          if (key == dbName) {
+            DBs[dbName].close();
+            delete DBs[dbName];
+          }
+        }
+
         var dbConnect = indexedDB.open(dbName, version);
 
         dbConnect.onsuccess = function (event) {
+          DBs[dbName] = event.target.result;
           resolve(event.target.result);
         };
         dbConnect.onerror = function (event) {
@@ -73,9 +85,10 @@ function openDB(dbName) {
 
 
 var db = Object.freeze({
+	DBs: DBs,
 	getDBNames: getDBNames,
 	createDB: createDB,
-	openDB: openDB
+	getDB: getDB
 });
 
 /**
@@ -225,31 +238,29 @@ function createStore(_ref) {
   }
 
   return new Promise(function (resolve, reject) {
-    getDBNames().then(function (dbNames) {
-      if (dbNames.indexOf(dbName) >= 0) {
-        var dbConnect = indexedDB.open(dbName, version);
+    getDB(dbName).then(function (db) {
+      db.close();
 
-        dbConnect.onupgradeneeded = function (event) {
-          var db = event.target.result;
-          if (db.objectStoreNames.contains(storeName)) {
-            //是否已存在该对象库
-            reject(new Error('storeName ' + storeName + ' has existed'));
-          } else {
-            var store = db.createObjectStore(storeName, keyOptions); //创建对象库
-            for (var i in index) {
-              //创建索引
-              store.createIndex(index[i].indexName, index[i].indexKey, index[i].indexOptions);
-            }
-            resolve(store);
+      var dbConnect = indexedDB.open(dbName, version);
+
+      dbConnect.onupgradeneeded = function (event) {
+        var db = event.target.result;
+        if (db.objectStoreNames.contains(storeName)) {
+          //是否已存在该对象库
+          reject(new Error('storeName ' + storeName + ' has existed'));
+        } else {
+          var store = db.createObjectStore(storeName, keyOptions); //创建对象库
+          for (var i in index) {
+            //创建索引
+            store.createIndex(index[i].indexName, index[i].indexKey, index[i].indexOptions);
           }
-        };
+          resolve(store);
+        }
+      };
 
-        dbConnect.onerror = function (event) {
-          reject(new Error('error, db errorCode: ' + event.target.errorCode));
-        };
-      } else {
-        throw new Error('db ' + dbName + ' doesn\'t existes');
-      }
+      dbConnect.onerror = function (event) {
+        reject(new Error('error, db errorCode: ' + event.target.errorCode));
+      };
     }).catch(function (error) {
       reject(error);
     });
