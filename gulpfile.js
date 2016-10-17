@@ -8,3 +8,7 @@ gulp.task('rollup', function() {
     moduleName: 'IndexDB'
   });
 });
+
+gulp.task('watch:rollup', function(){
+  gulp.watch('./lib/*.js', ['rollup']);
+});

@@ -23,9 +23,12 @@ describe('db.js', function(){
 
   describe('getDB function', function() {
     it('should return a db', function() {
-      return IndexDB.getDB('abc').then(function(db){
-        window.abc = db;
+      return IndexDB.createDB('abc').then(function(db){
+        return IndexDB.getDB('abc');
+      }).then(function(db) {
         expect(db instanceof IDBDatabase).equal(true);
+      }).catch(function(err) {
+        expect(err.message).equal('db abc has existed');
       });
     });
   });
