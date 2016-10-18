@@ -12,23 +12,25 @@ IndexDB.getDBNames().then(function(dbNames){
 #### create a new db
 
 ```javascript
+/**
+* dbName:[String]
+* version:[Number], optional ,default to be new Date().getTime()
+*/
 IndexDB.createDB(dbName, version).then(function(db){
   //db
 });
 ```
-> * dbName: string
-> * version: number, optional ,default to be `new Date().getTime()`
-
 #### open a existed db
 
 ```javascript
+/**
+* dbName:[String]
+* version:[Number], optional ,default to be new Date().getTime()
+*/
 IndexDB.openDB(dbName, version).then(function(db){
   //db
 });
 ```
-
-> * dbName: string
-> * version: number, optional ,default to be `new Date().getTime()`
 
 ### Object Store
 
@@ -44,8 +46,8 @@ var opts = {
     autoIncrement: false,//是否自增长
   },
   index: [  //索引项
-    {indexName: 'stu_id', indexKey: 'id',indexOptions: {unqiue: false, mulitEntry: false}},
-    {indexName: 'stu_name', indexKey: 'name', indexOptions: {unqiue: false, mulitEntry: false}},
+    {indexName: 'id', indexKey: 'id',indexOptions: {unqiue: false, mulitEntry: false}},
+    {indexName: 'name', indexKey: 'name', indexOptions: {unqiue: false, mulitEntry: false}},
   ]
 };
 */
@@ -65,54 +67,115 @@ IndexDB.createStore(opts).then(function(store){
 #### get store
 
 ```javascript
+/**
+* db:[IDBDatabase]
+* storeName:[String]
+*/
 var store = IndexDB.getStore(db, storeName);
 ```
-
-> * db: IDBDatabase instance
-> * storeName: String
 
 #### get data count in a store
 
 ```javascript
+/**
+* db:[IDBDatabase]
+* storeName:[String]
+*/
 IndexDB.getStoreCount(db, storeName).then(function(count){
   //count
 });
 ```
 
-> * db: IDBDatabase instance
-> * storeName: String
-
-#### clear data
+#### clear store
 
 ```javascript
+/**
+* store:[IDBObjectStore]
+*/
 IndexDB.clearStore(store);
 ```
-
-> * store: IDBObjectStore instance
 
 #### delete store
 
 ```javascript
+/**
+* db:[IDBDatabase]
+* storeName:[String]
+*/
 IndexDB.deleteStore(db, storeName);
 ```
-
-> * db: IDBDatabase instance
-> * storeName: String
 
 ### Data
 
 #### get all data in a store
 
 ```javascript
+/**
+* store:[IDBObjectStore]
+*/
 IndexDB.getAllData(store).then(function(dataArr){
   //dataArr:<Array>
 });
 ```
 
-> * store: IDBObjectStore instance
+#### add one data
+
+```javascript
+/**
+* store:[IDBObjectStore]
+* data:[Object]
+*/
+var data = {
+  id: 1,
+  name: 'a'
+};
+IndexDB.addOneData(store, data).then(function(storeDataCount) {
+  //storeDataCount
+});
+```
+
+#### put one data
+
+```javascript
+/**
+* store:[IDBObjectStore]
+* data:[Object]
+*/
+var data = {
+  id: 1,
+  name: 'a'
+};
+IndexDB.putOneData(store, data).then(function(storeDataCount) {
+  //storeDataCount
+});
+```
 
 #### get data by index
 
+```javascript
+/**
+* store:[IDBObjectStore]
+* indexkey:[String]
+* value:[any]
+* example: IndexDB.getDataByIndex(store_users, 'id', 1);
+*/
+IndexDB.getDataByIndex(store, indexKey, value).then(function(data) {
+  //data
+});
+```
 
+#### get range data by primary key
+
+```javascript
+/**
+* store:[IDBObjectStore]
+* start:[Number]
+* end:[Number]
+* example: IndexDB.getRangeDataByPrimaryKey(store_users, 3, 6);
+*/
+IndexDB.getRangeDataByPrimaryKey(store, start, end).then(function(arr) {
+  //arr
+});
+```
 
 > ….to be continue
