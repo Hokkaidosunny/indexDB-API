@@ -16,7 +16,7 @@ function getDBNames() {
     };
 
     get_dbNames_req.onerror = function (event) {
-      reject(new Error("error, db errorCode: " + event.target.errorCode));
+      reject(new Error(event.target.error.message));
     };
   });
 }
@@ -38,7 +38,7 @@ function createDB(dbName) {
         resolve(event.target.result);
       };
       dbConnect.onerror = function (event) {
-        reject(event.target.errorCode);
+        reject(event.target.error.message);
       };
     }).catch(function (error) {
       reject(error);
@@ -71,7 +71,7 @@ function getDB(dbName) {
           resolve(event.target.result);
         };
         dbConnect.onerror = function (event) {
-          reject(event);
+          reject(event.target.error.message);
         };
       } else {
         throw new Error("db " + dbName + " doesn't existes");
@@ -95,7 +95,13 @@ var db = Object.freeze({
  * 获取指定对象库的所有数据
  */
 function getAllData(store) {
+
   return new Promise(function (resolve, reject) {
+
+    if (!(store instanceof IDBObjectStore)) {
+      reject(new Error('store parameter should be an instance of IDBObjectStore'));
+    }
+
     var req = store.openCursor(),
         dataArr = [];
 
@@ -110,7 +116,7 @@ function getAllData(store) {
     };
 
     req.onerror = function (event) {
-      reject(new Error("error, db errorCode: " + event.target.errorCode));
+      reject(new Error(event.target.error.message));
     };
   });
 }
@@ -120,6 +126,11 @@ function getAllData(store) {
  */
 function getDataByIndex(store, indexName, value) {
   return new Promise(function (resolve, reject) {
+
+    if (!(store instanceof IDBObjectStore)) {
+      reject(new Error('store parameter should be an instance of IDBObjectStore'));
+    }
+
     var index = store.index(indexName);
     var req = index.get(value);
 
@@ -128,7 +139,7 @@ function getDataByIndex(store, indexName, value) {
     };
 
     req.onerror = function (event) {
-      reject(new Error("error, db errorCode: " + event.target.errorCode));
+      reject(new Error(event.target.error.message));
     };
   });
 }
@@ -136,8 +147,13 @@ function getDataByIndex(store, indexName, value) {
 /**
  * 用主键获取指定对象库的范围数据
  */
-function getRangeDataByKey(store, start, end) {
+function getRangeDataByPrimaryKey(store, start, end) {
   return new Promise(function (resolve, reject) {
+
+    if (!(store instanceof IDBObjectStore)) {
+      reject(new Error('store parameter should be an instance of IDBObjectStore'));
+    }
+
     var range = IDBKeyRange.bound(start, end),
         dataArr = [],
         req = store.openCursor(range);
@@ -153,7 +169,7 @@ function getRangeDataByKey(store, start, end) {
     };
 
     req.onerror = function (event) {
-      reject(new Error("error, db errorCode: " + event.target.errorCode));
+      reject(new Error(event.target.error.message));
     };
   });
 }
@@ -163,13 +179,18 @@ function getRangeDataByKey(store, start, end) {
  */
 function addOneData(store, data) {
   return new Promise(function (resolve, reject) {
+
+    if (!(store instanceof IDBObjectStore)) {
+      reject(new Error('store parameter should be an instance of IDBObjectStore'));
+    }
+
     var add_data_req = store.add(data);
 
     add_data_req.onsuccess = function (event) {
       resolve(event.target.result);
     };
     add_data_req.onerror = function (event) {
-      reject(new Error("error, db errorCode: " + event.target.errorCode));
+      reject(new Error(event.target.error.message));
     };
   });
 }
@@ -179,13 +200,17 @@ function addOneData(store, data) {
  */
 function putOneData(store, data) {
   return new Promise(function (resolve, reject) {
-    var add_data_req = store.put(data);
 
+    if (!(store instanceof IDBObjectStore)) {
+      reject(new Error('store parameter should be an instance of IDBObjectStore'));
+    }
+
+    var add_data_req = store.put(data);
     put_data_req.onsuccess = function (event) {
       resolve(event.target.result);
     };
     put_data_req.onerror = function (event) {
-      reject(new Error("error, db errorCode: " + event.target.errorCode));
+      reject(new Error(event.target.error.message));
     };
   });
 }
@@ -194,7 +219,12 @@ function putOneData(store, data) {
  * 按主键删除数据
  */
 function deleteDataByKey(store, value) {
-  store.delete(value);
+  if (store instanceof IDBObjectStore) {
+    store.delete(value);
+    return true;
+  } else {
+    return false;
+  }
 }
 
 
@@ -202,7 +232,7 @@ function deleteDataByKey(store, value) {
 var data = Object.freeze({
 	getAllData: getAllData,
 	getDataByIndex: getDataByIndex,
-	getRangeDataByKey: getRangeDataByKey,
+	getRangeDataByPrimaryKey: getRangeDataByPrimaryKey,
 	addOneData: addOneData,
 	putOneData: putOneData,
 	deleteDataByKey: deleteDataByKey
@@ -270,7 +300,7 @@ function createStore(_ref) {
       };
 
       dbConnect.onerror = function (event) {
-        reject(new Error('error, db errorCode: ' + event.target.errorCode));
+        reject(new Error(event.target.error.message));
       };
     }).catch(function (error) {
       reject(error);
@@ -308,7 +338,7 @@ function deleteStore(dbName, storeName) {
       };
 
       dbConnect.onerror = function (event) {
-        reject(new Error('error, db errorCode: ' + event.target.errorCode));
+        reject(new Error(event.target.error.message));
       };
     }).catch(function (error) {
       reject(error);
@@ -333,7 +363,7 @@ function getStoreCount(db, storeName) {
     };
 
     store_count_req.onerror = function (event) {
-      reject(new Error('error, db errorCode: ' + event.target.errorCode));
+      reject(new Error(event.target.error.message));
     };
   });
 }

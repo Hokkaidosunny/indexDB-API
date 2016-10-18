@@ -2,7 +2,7 @@ mocha.ui('bdd');
 mocha.timeout(2000);
 var expect = chai.expect;
 
-describe('db.js', function(){
+/*describe('db.js', function(){
   describe('getDBNames function', function() {
     it('should return an array', function() {
       return IndexDB.getDBNames().then(function(dbNames){
@@ -33,4 +33,4 @@ describe('db.js', function(){
     });
   });
 
-});
+});*/

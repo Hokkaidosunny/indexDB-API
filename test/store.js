@@ -9,8 +9,8 @@ describe('store.js', function(){
           autoIncrement: false //是否自增长
         },
         index: [  //索引项
-          { indexName: 'stu_id', indexKey: 'id', indexOptions: { unqiue: false, mulitEntry: false } },
-          { indexName: 'stu_name', indexKey: 'name', indexOptions: { unqiue: false, mulitEntry: false } }
+          { indexName: 'id', indexKey: 'id', indexOptions: { unqiue: false, mulitEntry: false } },
+          { indexName: 'name', indexKey: 'name', indexOptions: { unqiue: false, mulitEntry: false } }
         ]
       };
 

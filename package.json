@@ -29,10 +29,6 @@
     "chai": "^3.5.0",
     "eslint": "^3.7.1",
     "gulp": "^3.9.1",
-    "mocha": "^3.0.2",
-    "mocha-phantomjs": "^4.1.0"
-  },
-  "dependencies": {
-    "es6-promise": "^4.0.3"
+    "mocha": "^3.0.2"
   }
 }
