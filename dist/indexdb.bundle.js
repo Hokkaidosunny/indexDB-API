@@ -1,11 +1,84 @@
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-  typeof define === 'function' && define.amd ? define(factory) :
-  (global.IndexDB = factory());
+	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+	typeof define === 'function' && define.amd ? define(factory) :
+	(global.IndexDB = factory());
 }(this, (function () { 'use strict';
 
+var showError = (function (msg) {
+  console.error("[indexdb_api]: " + msg + ".");
+});
+
+//cache
 var DBs = {};
 
+/**
+ * create a new db
+ */
+function createDB(dbName) {
+  var version = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : new Date().getTime();
+
+  return new Promise(function (resolve, reject) {
+    var dbConnect = window.indexedDB.open(dbName, version);
+    dbConnect.onsuccess = function (event) {
+      //save the opened db
+      DBs[dbName] = event.target.result;
+      resolve(event.target.result);
+    };
+    dbConnect.onerror = function (event) {
+      showError(event.target.error.message);
+      reject(event.target.error);
+    };
+  });
+}
+
+/**
+ * delete a existed db
+ */
+function deleteDB(dbName) {
+  return new Promise(function (resolve, reject) {
+    var dbConnect = window.indexedDB.deleteDatabase(dbName);
+    dbConnect.onsuccess = function () {
+      resolve();
+    };
+    dbConnect.onerror = function (event) {
+      showError(event.target.error.message);
+      reject(event.target.error);
+    };
+  });
+}
+
+/**
+ * open an existed db
+ */
+function getDB(dbName) {
+
+  return new Promise(function (resolve, reject) {
+    getDBNames().then(function (dbNames) {
+      //name error
+      if (dbNames.indexOf(dbName) < 0) {
+        showError('you haven\'t created this named db, use createDB[function] to creat it');
+        reject();
+      }
+
+      //get db from cache
+      if (DBs[dbName]) {
+        resolve(DBs[dbName]);
+      }
+
+      //get db from connect
+      return createDB(dbName);
+    }).then(function (db) {
+      resolve(db);
+    }).catch(function (error) {
+      reject(error);
+    });
+  });
+}
+
+/**
+ * get all dbnames
+ * @return {[type]} [description]
+ */
 function getDBNames() {
   return new Promise(function (resolve, reject) {
     var get_dbNames_req = window.indexedDB.webkitGetDatabaseNames();
@@ -16,69 +89,9 @@ function getDBNames() {
     };
 
     get_dbNames_req.onerror = function (event) {
-      reject(new Error(event.target.error.message));
+      showError(event.target.error.message);
+      reject(event.target.error);
     };
-  });
-}
-
-/**
- * create a new db
- */
-function createDB(dbName) {
-  var version = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : new Date().getTime();
-
-  return new Promise(function (resolve, reject) {
-    getDBNames().then(function (dbNames) {
-      if (dbNames.indexOf(dbName) >= 0) {
-        throw new Error("db " + dbName + " has existed");
-      }
-
-      var dbConnect = indexedDB.open(dbName, version);
-      dbConnect.onsuccess = function (event) {
-        resolve(event.target.result);
-      };
-      dbConnect.onerror = function (event) {
-        reject(event.target.error.message);
-      };
-    }).catch(function (error) {
-      reject(error);
-    });
-  });
-}
-
-/**
- * open an existed db
- */
-function getDB(dbName) {
-  var version = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : new Date().getTime();
-
-  return new Promise(function (resolve, reject) {
-    getDBNames().then(function (dbNames) {
-      if (dbNames.indexOf(dbName) >= 0) {
-
-        //delete the db in the DBs
-        for (var key in DBs) {
-          if (key == dbName) {
-            DBs[dbName].close();
-            delete DBs[dbName];
-          }
-        }
-
-        var dbConnect = indexedDB.open(dbName, version);
-
-        dbConnect.onsuccess = function (event) {
-          DBs[dbName] = event.target.result;
-          resolve(event.target.result);
-        };
-        dbConnect.onerror = function (event) {
-          reject(event.target.error.message);
-        };
-      } else {
-        throw new Error("db " + dbName + " doesn't existes");
-      }
-    }).catch(function (error) {
-      reject(error);
-    });
   });
 }
 
@@ -88,7 +101,8 @@ var db = Object.freeze({
 	DBs: DBs,
 	getDBNames: getDBNames,
 	createDB: createDB,
-	getDB: getDB
+	getDB: getDB,
+	deleteDB: deleteDB
 });
 
 /**
@@ -205,7 +219,7 @@ function putOneData(store, data) {
       reject(new Error('store parameter should be an instance of IDBObjectStore'));
     }
 
-    var add_data_req = store.put(data);
+    var put_data_req = store.put(data);
     put_data_req.onsuccess = function (event) {
       resolve(event.target.result);
     };
@@ -252,16 +266,16 @@ function getStore(db, storeName) {
  * create a new store in an existed db
  */
 function createStore(_ref) {
-  var _ref$dbName = _ref.dbName;
-  var dbName = _ref$dbName === undefined ? null : _ref$dbName;
-  var _ref$storeName = _ref.storeName;
-  var storeName = _ref$storeName === undefined ? null : _ref$storeName;
-  var _ref$version = _ref.version;
-  var version = _ref$version === undefined ? new Date().getTime() : _ref$version;
-  var _ref$keyOptions = _ref.keyOptions;
-  var keyOptions = _ref$keyOptions === undefined ? {} : _ref$keyOptions;
-  var _ref$index = _ref.index;
-  var index = _ref$index === undefined ? [] : _ref$index;
+  var _ref$dbName = _ref.dbName,
+      dbName = _ref$dbName === undefined ? null : _ref$dbName,
+      _ref$storeName = _ref.storeName,
+      storeName = _ref$storeName === undefined ? null : _ref$storeName,
+      _ref$version = _ref.version,
+      version = _ref$version === undefined ? new Date().getTime() : _ref$version,
+      _ref$keyOptions = _ref.keyOptions,
+      keyOptions = _ref$keyOptions === undefined ? {} : _ref$keyOptions,
+      _ref$index = _ref.index,
+      index = _ref$index === undefined ? [] : _ref$index;
 
   if (!dbName || !storeName) {
     console.error('dbName and storeName are required');
@@ -401,68 +415,9 @@ var _extends = Object.assign || function (target) {
   return target;
 };
 
-var get = function get(object, property, receiver) {
-  if (object === null) object = Function.prototype;
-  var desc = Object.getOwnPropertyDescriptor(object, property);
-
-  if (desc === undefined) {
-    var parent = Object.getPrototypeOf(object);
-
-    if (parent === null) {
-      return undefined;
-    } else {
-      return get(parent, property, receiver);
-    }
-  } else if ("value" in desc) {
-    return desc.value;
-  } else {
-    var getter = desc.get;
-
-    if (getter === undefined) {
-      return undefined;
-    }
-
-    return getter.call(receiver);
-  }
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-var set = function set(object, property, value, receiver) {
-  var desc = Object.getOwnPropertyDescriptor(object, property);
-
-  if (desc === undefined) {
-    var parent = Object.getPrototypeOf(object);
-
-    if (parent !== null) {
-      set(parent, property, value, receiver);
-    }
-  } else if ("value" in desc && desc.writable) {
-    desc.value = value;
-  } else {
-    var setter = desc.set;
-
-    if (setter !== undefined) {
-      setter.call(receiver, value);
-    }
-  }
-
-  return value;
-};
+if (!window.indexedDB) {
+  showError('Your browser doesn\'t support indexedDB.');
+}
 
 var index = _extends({}, db, data, store);
 

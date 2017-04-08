@@ -1,3 +1,6 @@
+var expect = chai.expect;
+mocha.ui('bdd');
+
 describe('store.js', function(){
   describe('createStore function', function() {
     it('should create store and return it', function() {
