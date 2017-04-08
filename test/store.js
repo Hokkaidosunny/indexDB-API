@@ -2,8 +2,27 @@ var expect = chai.expect;
 mocha.ui('bdd');
 
 describe('store.js', function(){
-  describe('createStore function', function() {
-    it('should create store and return it', function() {
+  //clear dbs
+  // describe('deleteDB(\'abc\')', function() {
+  //   it('should return undefined', function() {
+  //     return IndexDB.deleteDB('abc').then(function(res) {
+  //       expect(res).equal(undefined);
+  //     });
+  //   });
+  // });
+  //
+  // describe('createDB(\'abc\')', function() {
+  //   it('should return a IDBDatabase instance named \'abc\'', function() {
+  //     return IndexDB.createDB('abc').then(function(db) {
+  //       expect(db instanceof IDBDatabase).equal(true);
+  //       expect(db.name).equal('abc');
+  //       return db;
+  //     });
+  //   });
+  // });
+
+  describe('createStore(options)', function() {
+    it('should create store named \'users\'and return it', function() {
       var options = {
         dbName: 'abc',
         storeName: 'users',
@@ -12,51 +31,49 @@ describe('store.js', function(){
           autoIncrement: false //是否自增长
         },
         index: [  //索引项
-          { indexName: 'id', indexKey: 'id', indexOptions: { unqiue: false, mulitEntry: false } },
-          { indexName: 'name', indexKey: 'name', indexOptions: { unqiue: false, mulitEntry: false } }
+          {
+            indexName: 'idIndex',
+            indexKey: 'id',
+            indexOptions: { unqiue: false, mulitEntry: false }
+          }, {
+            indexName: 'nameIndex',
+            indexKey: 'name',
+            indexOptions: { unqiue: false, mulitEntry: false }
+          }
         ]
       };
 
-      return IndexDB.getDB('abc').then(function(db) {
-        return IndexDB.createStore(options);
-      }).then(function(store){
+      return IndexDB.createStore(options).then(function(store){
         expect(store instanceof IDBObjectStore).equal(true);
-      }).catch(function(err){
-        var errMsgs = ['storeName users has existed', "db abc doesn't existes", 'you need call getDB function first'];
-        var assert = errMsgs.indexOf(err.message) >= 0;
-        expect(assert).equal(true);
+        expect(store.name).equal('users');
       });
     });
   });
 
-  describe('getStore function', function(){
-    it('should return store', function(){
-      return IndexDB.getDB('abc').then(function(db){
-        var store_users = IndexDB.getStore(db, 'users');
-        expect(store_users instanceof IDBObjectStore).equal(true);
+  describe('getStore(\'abc\', \'users\')', function(){
+    it('should return store', function() {
+      return IndexDB.getStore('abc', 'users').then(function(store) {
+        expect(store instanceof IDBObjectStore).equal(true);
+        expect(store.name).equal('users');
       });
     });
   });
 
-  describe('getStoreCount function', function(){
+  describe('getStoreCount(\'abc\', \'users\')', function(){
     it('should return store count', function(){
-      return IndexDB.getDB('abc').then(function(db){
-        return IndexDB.getStoreCount(db, 'users');
-      }).then(function(count) {
+      return IndexDB.getStoreCount('abc', 'users').then(function(count) {
         expect(typeof count).equal('number');
       });
     })
   });
 
-/*  describe('deleteStore function', function(){
-    it('should delete store', function(){
-      return IndexDB.deleteStore('abc', 'users').then(function(db){
-        console.log(db);
+  describe('deleteStore(\'abc\', \'users\')', function(){
+    it('should delete store \'users\' and return db \'abc\'', function() {
+      return IndexDB.deleteStore('abc', 'users').then(function(db) {
+        expect(db instanceof IDBDatabase).equal(true);
+        expect(db.name).equal('abc');
       });
     });
-  });*/
-
-
-
+  });
 
 });

@@ -5,7 +5,7 @@
 }(this, (function () { 'use strict';
 
 var showError = (function (msg) {
-  console.error("[indexdb_api]: " + msg + ".");
+  console.error("[indexdb_api]: " + msg);
 });
 
 //cache
@@ -53,21 +53,14 @@ function deleteDB(dbName) {
 function getDB(dbName) {
 
   return new Promise(function (resolve, reject) {
-    getDBNames().then(function (dbNames) {
-      //name error
-      if (dbNames.indexOf(dbName) < 0) {
-        showError('you haven\'t created this named db, use createDB[function] to creat it');
-        reject();
-      }
+    //get db from cache
+    if (DBs[dbName]) {
+      resolve(DBs[dbName]);
+      return;
+    }
 
-      //get db from cache
-      if (DBs[dbName]) {
-        resolve(DBs[dbName]);
-      }
-
-      //get db from connect
-      return createDB(dbName);
-    }).then(function (db) {
+    //get db from connect
+    createDB(dbName).then(function (db) {
       resolve(db);
     }).catch(function (error) {
       reject(error);
@@ -252,16 +245,6 @@ var data = Object.freeze({
 	deleteDataByKey: deleteDataByKey
 });
 
-function getStore(db, storeName) {
-  if (db instanceof IDBDatabase && db.objectStoreNames.contains(storeName)) {
-    var tx = db.transaction(storeName, 'readwrite');
-    return tx.objectStore(storeName);
-  } else {
-    console.error('store ' + storeName + ' doesn\'t existes');
-    return false;
-  }
-}
-
 /**
  * create a new store in an existed db
  */
@@ -278,82 +261,78 @@ function createStore(_ref) {
       index = _ref$index === undefined ? [] : _ref$index;
 
   if (!dbName || !storeName) {
-    console.error('dbName and storeName are required');
+    showError('dbName and storeName are both required');
     return false;
   }
 
   return new Promise(function (resolve, reject) {
-    getDBNames().then(function (dbNames) {
-      if (dbNames.indexOf(dbName) < 0) {
-        reject(new Error('db ' + dbName + ' doesn\'t existes'));
-      }
 
-      if (!DBs[dbName]) {
-        reject(new Error('you need call getDB function first'));
-      }
-
+    //close this db and delete form cache
+    if (DBs[dbName]) {
       DBs[dbName].close();
       delete DBs[dbName];
+    }
 
-      var dbConnect = indexedDB.open(dbName, version);
+    var dbConnect = window.indexedDB.open(dbName, version);
+    var store = void 0;
 
-      dbConnect.onupgradeneeded = function (event) {
-        var db = event.target.result;
-        DBs[dbName] = db;
-        if (db.objectStoreNames.contains(storeName)) {
-          //是否已存在该对象库
-          reject(new Error('storeName ' + storeName + ' has existed'));
-        } else {
-          var store = db.createObjectStore(storeName, keyOptions); //创建对象库
-          for (var i in index) {
-            //创建索引
-            store.createIndex(index[i].indexName, index[i].indexKey, index[i].indexOptions);
-          }
-          resolve(store);
+    //only in onupgradeneeded event , you can create store
+    dbConnect.onupgradeneeded = function (event) {
+      var db = event.target.result;
+      //cache this db
+      DBs[dbName] = db;
+      if (db.objectStoreNames.contains(storeName)) {
+        //是否已存在该对象库
+        showError('storeName ' + storeName + ' has existed in db ' + dbName);
+        reject();
+      } else {
+        store = db.createObjectStore(storeName, keyOptions); //创建对象库
+        for (var i in index) {
+          //创建索引
+          store.createIndex(index[i].indexName, index[i].indexKey, index[i].indexOptions);
         }
-      };
+      }
+    };
 
-      dbConnect.onerror = function (event) {
-        reject(new Error(event.target.error.message));
-      };
-    }).catch(function (error) {
-      reject(error);
-    });
+    //wait for success to resolve
+    dbConnect.onsuccess = function () {
+      resolve(store);
+    };
+
+    dbConnect.onerror = function (event) {
+      showError(event.target.error.message);
+      reject(event.target.error);
+    };
   });
 }
 
-function deleteStore(dbName, storeName) {
-  var version = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : new Date().getTime();
+/**
+ * [getStore description]
+ * @param  {[type]} dbName    [description]
+ * @param  {[type]} storeName [description]
+ * @return {[type]}           [description]
+ */
+function getStore(dbName, storeName) {
+
+  if (!dbName || !storeName) {
+    showError('dbName and storeName are both required');
+    return false;
+  }
 
   return new Promise(function (resolve, reject) {
-    getDBNames().then(function (dbNames) {
-      if (dbNames.indexOf(dbName) < 0) {
-        reject(new Error('db ' + dbName + ' doesn\'t existes'));
+    getDB(dbName).then(function (db) {
+      if (db instanceof IDBDatabase && db.objectStoreNames.contains(storeName)) {
+        var tx = db.transaction(storeName, 'readwrite');
+        var store = tx.objectStore(storeName);
+
+        tx.oncomplete = function () {
+          resolve(store);
+        };
+        resolve(store);
+      } else {
+        showError('store ' + storeName + ' doesn\'t existes in ' + dbName);
+        reject();
       }
-
-      if (!DBs[dbName]) {
-        reject(new Error('you need call getDB function first'));
-      }
-
-      DBs[dbName].close();
-      delete DBs[dbName];
-
-      var dbConnect = indexedDB.open(dbName, version);
-
-      dbConnect.onupgradeneeded = function (event) {
-        var db = event.target.result;
-        DBs[dbName] = db;
-        if (db.objectStoreNames.contains(storeName)) {
-          db.deleteObjectStore(storeName);
-          resolve(db);
-        } else {
-          reject(new Error('store ' + storeName + ' doesn\'t existes'));
-        }
-      };
-
-      dbConnect.onerror = function (event) {
-        reject(new Error(event.target.error.message));
-      };
     }).catch(function (error) {
       reject(error);
     });
@@ -361,24 +340,93 @@ function deleteStore(dbName, storeName) {
 }
 
 /**
- *获取对象仓库数据量
+ * [deleteStore description]
+ * @param  {[type]} dbName       [description]
+ * @param  {[type]} storeName    [description]
+ * @param  {Date}   [version=new Date(]        [description]
+ * @return {[type]}              [description]
  */
-function getStoreCount(db, storeName) {
+function deleteStore() {
+  var dbName = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+  var storeName = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+  var version = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : new Date().getTime();
+
+  if (!dbName || !storeName) {
+    showError('dbName and storeName are both required');
+    return false;
+  }
+
   return new Promise(function (resolve, reject) {
-    if (!(db instanceof IDBDatabase)) {
-      reject(new Error('db parameter should be an instance of IDBDatabase'));
+
+    //close this db and delete form cache
+    if (DBs[dbName]) {
+      DBs[dbName].close();
+      delete DBs[dbName];
     }
 
-    var store = getStore(db, storeName);
-    var store_count_req = store.count();
+    var dbConnect = window.indexedDB.open(dbName, version);
+    var db = void 0;
+    //only in onupgradeneeded event , you can delete store
+    dbConnect.onupgradeneeded = function (event) {
+      db = event.target.result;
+      //cache this db
+      DBs[dbName] = db;
+      if (db.objectStoreNames.contains(storeName)) {
+        db.deleteObjectStore(storeName);
+      } else {
+        showError('storeName ' + storeName + ' has existed in db ' + dbName);
+        reject();
+      }
+    };
+    window.ss = dbConnect;
 
-    store_count_req.onsuccess = function (event) {
-      resolve(event.target.result);
+    //wait for success to resolve
+    dbConnect.onsuccess = function () {
+      resolve(db);
     };
 
-    store_count_req.onerror = function (event) {
-      reject(new Error(event.target.error.message));
+    dbConnect.onerror = function (event) {
+      showError(event.target.error.message);
+      reject(event.target.error);
     };
+  });
+}
+
+/**
+ * [getStoreCount description]
+ * @param  {[type]} db        [description]
+ * @param  {[type]} storeName [description]
+ * @return {[type]}           [description]
+ */
+function getStoreCount(dbName, storeName) {
+
+  if (!dbName || !storeName) {
+    showError('dbName and storeName are both required');
+    return false;
+  }
+
+  return new Promise(function (resolve, reject) {
+    getDB(dbName).then(function (db) {
+      if (db instanceof IDBDatabase && db.objectStoreNames.contains(storeName)) {
+        var tx = db.transaction(storeName, 'readwrite');
+        var store = tx.objectStore(storeName);
+
+        //get count in transaction, you should create transaction before do anything to store
+        var store_count_req = store.count();
+        store_count_req.onsuccess = function (event) {
+          resolve(event.target.result);
+        };
+        store_count_req.onerror = function (event) {
+          showError(event.target.error.message);
+          reject(event.target.error);
+        };
+      } else {
+        showError('store ' + storeName + ' doesn\'t existes in ' + dbName);
+        reject();
+      }
+    }).catch(function (error) {
+      reject(error);
+    });
   });
 }
 

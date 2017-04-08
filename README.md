@@ -1,6 +1,6 @@
 ## Usage：
 
-### DB 
+### DB
 
 #### get all db names
 
@@ -42,12 +42,26 @@ var opts = {
   dbName: 'abc',
   storeName: 'users',
   keyOptions: {
-    keyPath:'id',//主键
-    autoIncrement: false,//是否自增长
+    keyPath: 'id', //primary key
+    autoIncrement: false, //auto increment
   },
-  index: [  //索引项
-    {indexName: 'id', indexKey: 'id',indexOptions: {unqiue: false, mulitEntry: false}},
-    {indexName: 'name', indexKey: 'name', indexOptions: {unqiue: false, mulitEntry: false}},
+  index: [  //index, use for query the data
+    {
+      indexName: 'idIndex',
+      indexKey: 'id',
+      indexOptions: {
+        unqiue: false,
+        mulitEntry: false
+      }
+    },
+    {
+      indexName: 'nameIndex',
+      indexKey: 'name',
+      indexOptions: {
+        unqiue: false,
+        mulitEntry: false
+      }
+    },
   ]
 };
 */

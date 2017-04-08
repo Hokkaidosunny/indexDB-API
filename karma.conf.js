@@ -16,7 +16,8 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       'dist/indexdb.bundle.js',
-      'test/db.js'
+      'test/db.js',
+      'test/store.js'
     ],
 
 

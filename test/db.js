@@ -1,5 +1,4 @@
 var expect = chai.expect;
-mocha.ui('bdd');
 
 describe('db.js', function(){
 
