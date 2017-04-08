@@ -6,7 +6,7 @@ describe('db.js', function(){
   //clear dbs
   describe('deleteDB(\'abc\')', function() {
     it('should return undefined', function() {
-      return IndexDB.deleteDB('abc').then((res) => {
+      return IndexDB.deleteDB('abc').then(function(res) {
         expect(res).equal(undefined);
       });
     });
