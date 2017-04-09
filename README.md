@@ -4,44 +4,55 @@
 
 ## Usage：
 
-### DB
+[see more example in `test/*.js`](https://github.com/Hokkaidosunny/indexdb-api/tree/master/test)
 
-#### get all db names
-
+### db.js
 ```javascript
-IndexDB.getDBNames().then(function(dbNames){
-  //dbNames
-});
+/**
+ * all the function retrun a promise
+ */
+
+/**
+ * get all db names
+ * return: [Array]
+ */
+IndexDB.getDBNames();
+
+
+/**
+ * create a db
+ * dbName: [String]
+ * version: [Number], optional ,default to be new Date().getTime()
+ * return: [IDBDatabase] a db instance
+ */
+IndexDB.createDB(dbName, version);
+
+/**
+ * open an existed db
+ * dbName: [String]
+ * version: [Number], optional ,default to be new Date().getTime()
+ * return: [IDBDatabase] a db instance
+ */
+IndexDB.openDB(dbName, version);
+
 ```
-#### create a new db
+
+### store.js
 
 ```javascript
 /**
-* dbName:[String]
-* version:[Number], optional ,default to be new Date().getTime()
-*/
-IndexDB.createDB(dbName, version).then(function(db){
-  //db
-});
-```
-#### open a existed db
-
-```javascript
-/**
-* dbName:[String]
-* version:[Number], optional ,default to be new Date().getTime()
-*/
-IndexDB.openDB(dbName, version).then(function(db){
-  //db
-});
-```
-
-### Object Store
-
-#### create a new store
-
-```javascript
+ * create a store
+ * opts = {
+     dbName: <String>,
+     storeName: <String>,
+     version: <Number, optional>,
+     keyOptions: <Object, optional>,
+     index: <Array, optional>
+   }
+ */
+IndexDB.createStore(opts);
 /* example
+
 var opts = {
   dbName: 'abc',
   storeName: 'users',
@@ -53,147 +64,126 @@ var opts = {
     {
       indexName: 'idIndex',
       indexKey: 'id',
-      indexOptions: {
-        unqiue: false,
-        mulitEntry: false
-      }
-    },
-    {
+      indexOptions: { unqiue: false, mulitEntry: false }
+    }, {
       indexName: 'nameIndex',
       indexKey: 'name',
-      indexOptions: {
-        unqiue: false,
-        mulitEntry: false
-      }
-    },
+      indexOptions: { unqiue: false, mulitEntry: false }
+    }
   ]
 };
-*/
-var opts = {
-  dbName: <String>,
-  storeName: <String>,
-  version: <Number, optional>,
-  keyOptions: <Object, optional>,
-  index: <Array, optional>
-};
+IndexDB.createStore(opts).then(() => {
+  console.log('success');
+})
 
-IndexDB.createStore(opts).then(function(store){
-  //store
-});
-```
+ */
 
-#### get store
 
-```javascript
 /**
-* db:[IDBDatabase]
-* storeName:[String]
+* dbName: [String]
+* storeName: [String]
+* return: [IDBObjectStore] a store instance
 */
-var store = IndexDB.getStore(db, storeName);
-```
+IndexDB.getStore(dbName, storeName);
 
-#### get data count in a store
-
-```javascript
 /**
-* db:[IDBDatabase]
-* storeName:[String]
-*/
-IndexDB.getStoreCount(db, storeName).then(function(count){
-  //count
-});
-```
+ * dbName: [String]
+ * storeName: [String]
+ * return: [Number] the count of the store data
+ */
+IndexDB.getStoreCount(dbName, storeName);
 
-#### clear store
-
-```javascript
 /**
-* store:[IDBObjectStore]
-*/
+ * clear the store data
+ * store: [IDBObjectStore]
+ */
 IndexDB.clearStore(store);
+
+/**
+ * delete a store
+ * dbName: [String]
+ * storeName: [String]
+ * version: [Number] , optional ,default to be new Date().getTime()
+ */
+IndexDB.deleteStore(dbName, storeName, version);
+
 ```
 
-#### delete store
+### Data.js
 
 ```javascript
 /**
-* db:[IDBDatabase]
-* storeName:[String]
-*/
-IndexDB.deleteStore(db, storeName);
-```
+ * dbName: [string]
+ * storeName: [string]
+ * return: [Array] return all the data
+ */
+IndexDB.getAllData(dbName, storeName);
 
-### Data
-
-#### get all data in a store
-
-```javascript
 /**
-* store:[IDBObjectStore]
+ * add a data
+ * dbName: [string]
+ * storeName: [string]
+ * data: [Object]
+ * return: [Array] return all the data
+ */
+IndexDB.addOneData(dbName, storeName, data);
+/* example
+
+var data = {id: 1, name: 'Tom'};
+IndexDB.addOneData('abc', 'users', data).then((count) => {
+  console.log('saved! now the data count is ' + count);
+})
+
 */
-IndexDB.getAllData(store).then(function(dataArr){
-  //dataArr:<Array>
+
+/**
+ * update a data according to the primary key
+ * dbName: [string]
+ * storeName: [string]
+ * data: [Object]
+ * return: [Array] return all the data
+ */
+IndexDB.putOneData(dbName, storeName, data);
+
+
+/**
+ * get data by index
+ * dbName: [string]
+ * storeName: [string]
+ * indexName: [string]
+ * value: [any]
+ */
+IndexDB.getDataByIndex(dbName, storeName, indexName, value);
+/* example
+IndexDB.getDataByIndex('abc', 'users', 'idIndex', 1).then((data) => {
+  console.log('the data is' + data);
 });
-```
-
-#### add one data
-
-```javascript
-/**
-* store:[IDBObjectStore]
-* data:[Object]
 */
-var data = {
-  id: 1,
-  name: 'a'
-};
-IndexDB.addOneData(store, data).then(function(storeDataCount) {
-  //storeDataCount
-});
-```
 
-#### put one data
-
-```javascript
 /**
-* store:[IDBObjectStore]
-* data:[Object]
-*/
-var data = {
-  id: 1,
-  name: 'a'
-};
-IndexDB.putOneData(store, data).then(function(storeDataCount) {
-  //storeDataCount
+ * get range data by primary key
+ * dbName: [string]
+ * storeName: [string]
+ * start: [string]
+ * end: [any]
+ */
+IndexDB.getRangeDataByPrimaryKey(dbName, storeName, start, end);
+/* example
+db: [
+  {
+    id: 1,  //primary key
+    name: 'Tom',
+    age: 20
+  }, {
+    id: 2,
+    name: 'Jerry',
+    age: 21
+  }
+]
+IndexDB.getRangeDataByPrimaryKey('abc', 'users', 1, 2).then((dataArr) => {
+  console.log('the data is' + dataArr);
 });
-```
-
-#### get data by index
-
-```javascript
-/**
-* store:[IDBObjectStore]
-* indexkey:[String]
-* value:[any]
-* example: IndexDB.getDataByIndex(store_users, 'id', 1);
 */
-IndexDB.getDataByIndex(store, indexKey, value).then(function(data) {
-  //data
-});
+
 ```
-
-#### get range data by primary key
-
-```javascript
-/**
-* store:[IDBObjectStore]
-* start:[Number]
-* end:[Number]
-* example: IndexDB.getRangeDataByPrimaryKey(store_users, 3, 6);
-*/
-IndexDB.getRangeDataByPrimaryKey(store, start, end).then(function(arr) {
-  //arr
-});
-```
-
 > ….to be continue
