@@ -108,31 +108,39 @@ var db = Object.freeze({
  * @param  {[type]} store [description]
  * @return {[type]}       [description]
  */
-function getAllData(store) {
+function getAllData(dbName, storeName) {
 
   return new Promise(function (resolve, reject) {
-
-    if (!isStoreInstance(store)) {
-      reject();
-    }
-
-    var req = store.openCursor(),
-        dataArr = [];
-
-    req.onsuccess = function (event) {
-      var cursor = event.target.result;
-      if (cursor) {
-        dataArr.push(cursor.value);
-        cursor.continue();
-      } else {
-        resolve(dataArr);
+    getDB(dbName).then(function (db) {
+      if (!isStoreNameCorrect(db, storeName)) {
+        reject();
       }
-    };
 
-    req.onerror = function (event) {
-      showError(event.target.error.message);
-      reject(event.target.error);
-    };
+      var tx = db.transaction(storeName, 'readwrite');
+      var store = tx.objectStore(storeName);
+
+      tx.oncomplete = function () {
+        resolve(dataArr);
+      };
+
+      var req = store.openCursor(),
+          dataArr = [];
+
+      req.onsuccess = function (event) {
+        var cursor = event.target.result;
+        if (cursor) {
+          dataArr.push(cursor.value);
+          cursor.continue();
+        }
+      };
+
+      req.onerror = function (event) {
+        showError(event.target.error.message);
+        reject(event.target.error);
+      };
+    }).catch(function (error) {
+      reject(error);
+    });
   });
 }
 
@@ -143,80 +151,109 @@ function getAllData(store) {
  * @param  {[type]} value     [description]
  * @return {[type]}           [description]
  */
-function getDataByIndex(store, indexName, value) {
+function getDataByIndex(dbName, storeName, indexName, value) {
   return new Promise(function (resolve, reject) {
+    getDB(dbName).then(function (db) {
+      if (!isStoreNameCorrect(db, storeName)) {
+        reject();
+      }
 
-    if (!isStoreInstance(store)) {
-      reject();
-    }
+      var tx = db.transaction(storeName, 'readwrite');
+      var store = tx.objectStore(storeName);
 
-    var index = store.index(indexName);
-    var req = index.get(value);
+      tx.oncomplete = function () {
+        resolve(data);
+      };
 
-    req.onsuccess = function (event) {
-      resolve(event.target.result);
-    };
+      var index = store.index(indexName);
+      var req = index.get(value);
+      var data = void 0;
 
-    req.onerror = function (event) {
-      showError(event.target.error.message);
-      reject(event.target.error);
-    };
+      req.onsuccess = function (event) {
+        data = event.target.result;
+      };
+
+      req.onerror = function (event) {
+        showError(event.target.error.message);
+        reject(event.target.error);
+      };
+    }).catch(function (error) {
+      reject(error);
+    });
   });
 }
 
 /**
  * 用主键获取指定对象库的范围数据
  */
-function getRangeDataByPrimaryKey(store, start, end) {
+function getRangeDataByPrimaryKey(dbName, storeName, start, end) {
   return new Promise(function (resolve, reject) {
-
-    if (!isStoreInstance(store)) {
-      reject();
-    }
-
-    var range = IDBKeyRange.bound(start, end),
-        dataArr = [],
-        req = store.openCursor(range);
-
-    req.onsuccess = function (event) {
-      var cursor = event.target.result;
-      if (cursor) {
-        dataArr.push(cursor.value);
-        cursor.continue();
-      } else {
-        resolve(dataArr);
+    getDB(dbName).then(function (db) {
+      if (!isStoreNameCorrect(db, storeName)) {
+        reject();
       }
-    };
 
-    req.onerror = function (event) {
-      showError(event.target.error.message);
-      reject(event.target.error);
-    };
+      var tx = db.transaction(storeName, 'readwrite');
+      var store = tx.objectStore(storeName);
+
+      tx.oncomplete = function () {
+        resolve(dataArr);
+      };
+
+      var range = IDBKeyRange.bound(start, end),
+          dataArr = [],
+          req = store.openCursor(range);
+
+      req.onsuccess = function (event) {
+        var cursor = event.target.result;
+        if (cursor) {
+          dataArr.push(cursor.value);
+          cursor.continue();
+        }
+      };
+
+      req.onerror = function (event) {
+        showError(event.target.error.message);
+        reject(event.target.error);
+      };
+    }).catch(function (error) {
+      reject(error);
+    });
   });
 }
 
 /**
- * [addOneData description]
- * @param {[type]} store [description]
- * @param {[type]} data  [description]
+ * addOneData
  */
-function addOneData(store, data) {
+
+function addOneData(dbName, storeName, data) {
   return new Promise(function (resolve, reject) {
+    getDB(dbName).then(function (db) {
+      if (!isStoreNameCorrect(db, storeName)) {
+        reject();
+      }
 
-    if (!isStoreInstance(store)) {
-      reject();
-    }
+      var tx = db.transaction(storeName, 'readwrite');
+      var store = tx.objectStore(storeName);
 
-    var add_data_req = store.add(data);
+      tx.oncomplete = function () {
+        resolve(count);
+      };
 
-    add_data_req.onsuccess = function (event) {
-      //event.target.result is the count of the data
-      resolve(event.target.result);
-    };
-    add_data_req.onerror = function (event) {
-      showError(event.target.error.message);
-      reject(event.target.error);
-    };
+      var add_data_req = store.add(data);
+      var count = void 0;
+
+      add_data_req.onsuccess = function (event) {
+        //event.target.result is the count of the data
+        count = event.target.result;
+      };
+      add_data_req.onerror = function (event) {
+        showError(event.target.error.message);
+        reject(event.target.error);
+      };
+    }).catch(function (error) {
+      reject(error);
+    });
   });
 }
 
@@ -224,47 +261,66 @@ function addOneData(store, data) {
  * update a data accoring to the primary key
  * you can use putOneData to add a data, when the primary is the same, then putOneData will update the old data
  */
-function putOneData(store, data) {
+function putOneData(dbName, storeName, data) {
   return new Promise(function (resolve, reject) {
+    getDB(dbName).then(function (db) {
+      if (!isStoreNameCorrect(db, storeName)) {
+        reject();
+      }
 
-    if (!isStoreInstance(store)) {
-      reject();
-    }
+      var tx = db.transaction(storeName, 'readwrite');
+      var store = tx.objectStore(storeName);
 
-    var put_data_req = store.put(data);
-    put_data_req.onsuccess = function (event) {
-      resolve(event.target.result);
-    };
-    put_data_req.onerror = function (event) {
-      showError(event.target.error.message);
-      reject(event.target.error);
-    };
+      tx.oncomplete = function () {
+        resolve(count);
+      };
+
+      var put_data_req = store.put(data);
+      var count = void 0;
+
+      put_data_req.onsuccess = function (event) {
+        count = event.target.result;
+      };
+      put_data_req.onerror = function (event) {
+        showError(event.target.error.message);
+        reject(event.target.error);
+      };
+    }).catch(function (error) {
+      reject(error);
+    });
   });
 }
 
 /**
  * 按主键删除数据
  */
-function deleteDataByPrimaKey(store, primaryKeyValue) {
-  if (isStoreInstance(store)) {
-    store.delete(primaryKeyValue);
-    return true;
-  } else {
-    return false;
-  }
+function deleteDataByPrimaKey(dbName, storeName, primaryKeyValue) {
+  return new Promise(function (resolve, reject) {
+    getDB(dbName).then(function (db) {
+      if (!isStoreNameCorrect(db, storeName)) {
+        reject();
+      }
+
+      var tx = db.transaction(storeName, 'readwrite');
+      var store = tx.objectStore(storeName);
+
+      tx.oncomplete = function () {
+        resolve(true);
+      };
+
+      store.delete(primaryKeyValue);
+    }).catch(function (error) {
+      reject(error);
+    });
+  });
 }
 
-/**
- * check store
- * @param  {[type]}  store [description]
- * @return {Boolean}       [description]
- */
-function isStoreInstance(store) {
-  if (!(store instanceof IDBObjectStore)) {
-    showError('store parameter should be an instance of IDBObjectStore');
-    return false;
-  } else {
+function isStoreNameCorrect(db, storeName) {
+  if (db.objectStoreNames.contains(storeName)) {
     return true;
+  } else {
+    showError('store ' + storeName + ' doesn\'t existes');
+    return false;
   }
 }
 

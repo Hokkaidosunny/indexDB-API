@@ -47,14 +47,9 @@ describe('data.js', function(){
   //   });
   // });
 
-  describe('getAllData(store) : get all data from store users in db abc', function(){
+  describe('getAllData(dbName, storeName) : get all data from store users in db abc', function(){
     it('should return array', function() {
-      return IndexDB.getStore('abc', 'users').then(function(store) {
-        expect(store instanceof IDBObjectStore).equal(true);
-        expect(store.name).equal('users');
-
-        return IndexDB.getAllData(store);
-      }).then((allData) => {
+      return IndexDB.getAllData('abc', 'users').then(function(allData) {
         console.log(allData);
         expect(getType.call(allData)).equal('[object Array]');
       });
@@ -62,87 +57,54 @@ describe('data.js', function(){
   });
 
 
-  describe('addOneData(store, data) : add one data to store users in db abc', function(){
+  describe('addOneData(dbName, storeName, data) : add one data to store users in db abc', function(){
     it('should return store count', function() {
-      return IndexDB.getStore('abc', 'users').then(function(store) {
-        expect(store instanceof IDBObjectStore).equal(true);
-        expect(store.name).equal('users');
-
-        var data = {
-          id: 1,
-          name: 'Tom',
-          age: 25
-        };
-        return IndexDB.addOneData(store, data);
-      }).then((count) => {
+      var data = {
+        id: 1,
+        name: 'Tom',
+        age: 25
+      };
+      return IndexDB.addOneData('abc', 'users', data).then(function(count) {
         expect(typeof count).equal('number');
       });
     });
   });
 
-  describe('putOneData(store, data) : update one data to store users in db abc', function(){
+  describe('putOneData(dbName, storeName, data) : update one data to store users in db abc', function(){
     it('should return store count', function() {
-      return IndexDB.getStore('abc', 'users').then(function(store) {
-        expect(store instanceof IDBObjectStore).equal(true);
-        expect(store.name).equal('users');
-
-        var data = {
-          id: 1,
-          name: 'Tom',
-          age: 26
-        };
-        return IndexDB.putOneData(store, data);
-      }).then((count) => {
+      var data = {
+        id: 1,
+        name: 'Tom',
+        age: 26
+      };
+      return IndexDB.putOneData('abc', 'users', data).then(function(count) {
         expect(typeof count).equal('number');
       });
     });
   });
 
-  describe('getDataByIndex(store, \'id\', 1) : get data by index', function(){
+  describe('getDataByIndex(dbName, storeName, \'id\', 1) : get data by index', function(){
     it('should return an object within a \'name\' property, and the value is \'Tom\'', function() {
-      return IndexDB.getStore('abc', 'users').then(function(store) {
-        expect(store instanceof IDBObjectStore).equal(true);
-        expect(store.name).equal('users');
-
-        return IndexDB.getDataByIndex(store, 'idIndex', 1);
-      }).then((data) => {
+      return IndexDB.getDataByIndex('abc', 'users', 'idIndex', 1).then(function(data) {
         console.log(data);
         expect(data.name).equal('Tom');
       });
     });
   });
 
-  describe('getRangeDataByPrimaryKey(store, start, end) : get data by Range', function(){
+  describe('getRangeDataByPrimaryKey(dbName, storeName, start, end) : get data by Range', function(){
     it('should return an array', function() {
-      return IndexDB.getStore('abc', 'users').then(function(store) {
-        expect(store instanceof IDBObjectStore).equal(true);
-        expect(store.name).equal('users');
-
-        var data = {
-          id: 2,
-          name: 'Tom',
-          age: 27
-        };
-        IndexDB.putOneData(store, data);
-        return store;
-      }).then((store) => {
-        return IndexDB.getRangeDataByPrimaryKey(store, 1, 2);
-      }).then((allData) => {
+      return IndexDB.getRangeDataByPrimaryKey('abc', 'users', 1, 2).then(function(allData) {
         console.log(allData);
         expect(getType.call(allData)).equal('[object Array]');
-        expect(allData.length).equal(2);
+        expect(allData.length).equal(1);
       });
     });
   });
 
-  describe('deleteDataByPrimaKey(store, primaryKeyValue) : delete data by primaryKeyValue', function(){
+  describe('deleteDataByPrimaKey(dbName, storeName, primaryKeyValue) : delete data by primaryKeyValue', function(){
     it('should return bool', function() {
-      return IndexDB.getStore('abc', 'users').then(function(store) {
-        expect(store instanceof IDBObjectStore).equal(true);
-        expect(store.name).equal('users');
-
-        return IndexDB.deleteDataByPrimaKey(store, 1);
-      }).then((bool) => {
+      return IndexDB.deleteDataByPrimaKey('abc', 'users', 1).then(function(bool) {
         expect(typeof bool).equal('boolean');
       });
     });
