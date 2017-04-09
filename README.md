@@ -1,3 +1,7 @@
+## indexdb-api
+[![Build Status](https://travis-ci.org/Hokkaidosunny/indexdb-api.svg?branch=master)](https://travis-ci.org/Hokkaidosunny/indexdb-api)
+[![Coverage Status](https://coveralls.io/repos/github/Hokkaidosunny/indexdb-api/badge.svg?branch=master)](https://coveralls.io/github/Hokkaidosunny/indexdb-api?branch=master)
+
 ## Usage：
 
 ### DB
