@@ -1,4 +1,6 @@
 var expect = chai.expect;
+var getType = Object.prototype.toString;
+mocha.ui('bdd');
 
 describe('db.js', function(){
 
@@ -22,10 +24,9 @@ describe('db.js', function(){
   });
 
   describe('getDBNames()', function() {
-    it('should return an array within \'abc\'', function() {
+    it('should return an array', function() {
       return IndexDB.getDBNames().then(function(dbNames) {
         expect(typeof dbNames.length).equal('number');
-        expect(dbNames.indexOf('abc') >= 0).equal(true);
       });
     });
   });

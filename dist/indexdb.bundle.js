@@ -74,6 +74,11 @@ function getDB(dbName) {
  */
 function getDBNames() {
   return new Promise(function (resolve, reject) {
+    if (!window.indexedDB.webkitGetDatabaseNames) {
+      showError('your browser doesn\'t support indexedDB.webkitGetDatabaseNames');
+      resolve([]);
+      return;
+    }
     var get_dbNames_req = window.indexedDB.webkitGetDatabaseNames();
 
     get_dbNames_req.onsuccess = function (event) {
@@ -99,14 +104,16 @@ var db = Object.freeze({
 });
 
 /**
- * 获取指定对象库的所有数据
+ * [getAllData description]
+ * @param  {[type]} store [description]
+ * @return {[type]}       [description]
  */
 function getAllData(store) {
 
   return new Promise(function (resolve, reject) {
 
-    if (!(store instanceof IDBObjectStore)) {
-      reject(new Error('store parameter should be an instance of IDBObjectStore'));
+    if (!isStoreInstance(store)) {
+      reject();
     }
 
     var req = store.openCursor(),
@@ -123,19 +130,24 @@ function getAllData(store) {
     };
 
     req.onerror = function (event) {
-      reject(new Error(event.target.error.message));
+      showError(event.target.error.message);
+      reject(event.target.error);
     };
   });
 }
 
 /**
- * 按indexName获取数据
+ * [getDataByIndex description]
+ * @param  {[type]} store     [description]
+ * @param  {[type]} indexName [description]
+ * @param  {[type]} value     [description]
+ * @return {[type]}           [description]
  */
 function getDataByIndex(store, indexName, value) {
   return new Promise(function (resolve, reject) {
 
-    if (!(store instanceof IDBObjectStore)) {
-      reject(new Error('store parameter should be an instance of IDBObjectStore'));
+    if (!isStoreInstance(store)) {
+      reject();
     }
 
     var index = store.index(indexName);
@@ -146,7 +158,8 @@ function getDataByIndex(store, indexName, value) {
     };
 
     req.onerror = function (event) {
-      reject(new Error(event.target.error.message));
+      showError(event.target.error.message);
+      reject(event.target.error);
     };
   });
 }
@@ -157,8 +170,8 @@ function getDataByIndex(store, indexName, value) {
 function getRangeDataByPrimaryKey(store, start, end) {
   return new Promise(function (resolve, reject) {
 
-    if (!(store instanceof IDBObjectStore)) {
-      reject(new Error('store parameter should be an instance of IDBObjectStore'));
+    if (!isStoreInstance(store)) {
+      reject();
     }
 
     var range = IDBKeyRange.bound(start, end),
@@ -176,40 +189,46 @@ function getRangeDataByPrimaryKey(store, start, end) {
     };
 
     req.onerror = function (event) {
-      reject(new Error(event.target.error.message));
+      showError(event.target.error.message);
+      reject(event.target.error);
     };
   });
 }
 
 /**
- * add a data
+ * [addOneData description]
+ * @param {[type]} store [description]
+ * @param {[type]} data  [description]
  */
 function addOneData(store, data) {
   return new Promise(function (resolve, reject) {
 
-    if (!(store instanceof IDBObjectStore)) {
-      reject(new Error('store parameter should be an instance of IDBObjectStore'));
+    if (!isStoreInstance(store)) {
+      reject();
     }
 
     var add_data_req = store.add(data);
 
     add_data_req.onsuccess = function (event) {
+      //event.target.result is the count of the data
       resolve(event.target.result);
     };
     add_data_req.onerror = function (event) {
-      reject(new Error(event.target.error.message));
+      showError(event.target.error.message);
+      reject(event.target.error);
     };
   });
 }
 
 /**
- * modify a data
+ * update a data accoring to the primary key
+ * you can use putOneData to add a data, when the primary is the same, then putOneData will update the old data
  */
 function putOneData(store, data) {
   return new Promise(function (resolve, reject) {
 
-    if (!(store instanceof IDBObjectStore)) {
-      reject(new Error('store parameter should be an instance of IDBObjectStore'));
+    if (!isStoreInstance(store)) {
+      reject();
     }
 
     var put_data_req = store.put(data);
@@ -217,7 +236,8 @@ function putOneData(store, data) {
       resolve(event.target.result);
     };
     put_data_req.onerror = function (event) {
-      reject(new Error(event.target.error.message));
+      showError(event.target.error.message);
+      reject(event.target.error);
     };
   });
 }
@@ -225,12 +245,26 @@ function putOneData(store, data) {
 /**
  * 按主键删除数据
  */
-function deleteDataByKey(store, value) {
-  if (store instanceof IDBObjectStore) {
-    store.delete(value);
+function deleteDataByPrimaKey(store, primaryKeyValue) {
+  if (isStoreInstance(store)) {
+    store.delete(primaryKeyValue);
     return true;
   } else {
     return false;
+  }
+}
+
+/**
+ * check store
+ * @param  {[type]}  store [description]
+ * @return {Boolean}       [description]
+ */
+function isStoreInstance(store) {
+  if (!(store instanceof IDBObjectStore)) {
+    showError('store parameter should be an instance of IDBObjectStore');
+    return false;
+  } else {
+    return true;
   }
 }
 
@@ -242,7 +276,7 @@ var data = Object.freeze({
 	getRangeDataByPrimaryKey: getRangeDataByPrimaryKey,
 	addOneData: addOneData,
 	putOneData: putOneData,
-	deleteDataByKey: deleteDataByKey
+	deleteDataByPrimaKey: deleteDataByPrimaKey
 });
 
 /**
@@ -324,11 +358,12 @@ function getStore(dbName, storeName) {
       if (db instanceof IDBDatabase && db.objectStoreNames.contains(storeName)) {
         var tx = db.transaction(storeName, 'readwrite');
         var store = tx.objectStore(storeName);
-
-        tx.oncomplete = function () {
-          resolve(store);
-        };
         resolve(store);
+        //  if do nothing, transaction will auto close
+        // can not resolve in oncomplete event, that means the transaction is close, nothing can be done
+        // tx.oncomplete = function() {
+        //
+        // };
       } else {
         showError('store ' + storeName + ' doesn\'t existes in ' + dbName);
         reject();

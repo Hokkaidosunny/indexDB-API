@@ -1,8 +1,5 @@
-var expect = chai.expect;
-mocha.ui('bdd');
-
 describe('store.js', function(){
-  //clear dbs
+  // //clear dbs
   // describe('deleteDB(\'abc\')', function() {
   //   it('should return undefined', function() {
   //     return IndexDB.deleteDB('abc').then(function(res) {
@@ -67,13 +64,13 @@ describe('store.js', function(){
     })
   });
 
-  describe('deleteStore(\'abc\', \'users\')', function(){
-    it('should delete store \'users\' and return db \'abc\'', function() {
-      return IndexDB.deleteStore('abc', 'users').then(function(db) {
-        expect(db instanceof IDBDatabase).equal(true);
-        expect(db.name).equal('abc');
-      });
-    });
-  });
+  // describe('deleteStore(\'abc\', \'users\')', function(){
+  //   it('should delete store \'users\' and return db \'abc\'', function() {
+  //     return IndexDB.deleteStore('abc', 'users').then(function(db) {
+  //       expect(db instanceof IDBDatabase).equal(true);
+  //       expect(db.name).equal('abc');
+  //     });
+  //   });
+  // });
 
 });
