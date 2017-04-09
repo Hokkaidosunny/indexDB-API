@@ -413,7 +413,6 @@ function deleteStore() {
         reject();
       }
     };
-    window.ss = dbConnect;
 
     //wait for success to resolve
     dbConnect.onsuccess = function () {
@@ -445,11 +444,16 @@ function getStoreCount(dbName, storeName) {
       if (db instanceof IDBDatabase && db.objectStoreNames.contains(storeName)) {
         var tx = db.transaction(storeName, 'readwrite');
         var store = tx.objectStore(storeName);
+        var count = void 0;
+
+        tx.oncomplete = function () {
+          resolve(count);
+        };
 
         //get count in transaction, you should create transaction before do anything to store
         var store_count_req = store.count();
         store_count_req.onsuccess = function (event) {
-          resolve(event.target.result);
+          count = event.target.result;
         };
         store_count_req.onerror = function (event) {
           showError(event.target.error.message);
