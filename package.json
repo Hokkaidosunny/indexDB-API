@@ -1,10 +1,10 @@
 {
   "name": "indexdb-api",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "indexdb simple api",
   "main": "dist/index.js",
   "scripts": {
-    "test": "rm -rf ./coverage && karma start --browsers Firefox --single-run",
+    "test": "rm -rf ./coverage && karma start --browsers Chrome --single-run",
     "build": "rm -rf es lib dist && node ./build.js",
     "release": "npm run build && standard-version && npm publish --registry=https://registry.npmjs.org/"
   },
@@ -22,7 +22,16 @@
   },
   "homepage": "https://github.com/Hokkaidosunny/indexdb_api#readme",
   "devDependencies": {
-    "build-my-package": "^0.0.8",
+    "build-my-package": "^0.0.10",
+    "chai": "^4.2.0",
+    "karma": "^3.1.3",
+    "karma-chai": "^0.1.0",
+    "karma-chrome-launcher": "^2.2.0",
+    "karma-coverage": "^1.1.2",
+    "karma-coveralls": "^2.1.0",
+    "karma-firefox-launcher": "^1.1.0",
+    "karma-mocha": "^1.3.0",
+    "mocha": "^5.2.0",
     "standard-version": "^4.4.0"
   }
 }
