@@ -1,12 +1,12 @@
 {
-  "name": "indexdb_api",
-  "version": "1.0.0",
+  "name": "indexdb-api",
+  "version": "0.2.0",
   "description": "indexdb simple api",
-  "main": "indexdb.js",
+  "main": "dist/index.js",
   "scripts": {
     "test": "rm -rf ./coverage && karma start --browsers Firefox --single-run",
-    "build": "gulp rollup",
-    "watch": "gulp watch:rollup"
+    "build": "rm -rf es lib dist && node ./build.js",
+    "release": "npm run build && standard-version && npm publish --registry=https://registry.npmjs.org/"
   },
   "repository": {
     "type": "git",
@@ -22,26 +22,7 @@
   },
   "homepage": "https://github.com/Hokkaidosunny/indexdb_api#readme",
   "devDependencies": {
-    "babel-core": "^6.24.1",
-    "babel-plugin-external-helpers": "^6.22.0",
-    "babel-preset-es2015": "^6.24.1",
-    "babel-preset-es2015-rollup": "^3.0.0",
-    "babel-preset-stage-0": "^6.24.1",
-    "chai": "^3.5.0",
-    "eslint": "^3.7.1",
-    "eslint-config-ssj": "^1.0.1",
-    "gulp": "^3.9.1",
-    "karma": "^1.6.0",
-    "karma-chai": "^0.1.0",
-    "karma-coverage": "^1.1.1",
-    "karma-coveralls": "^1.1.2",
-    "karma-firefox-launcher": "^1.0.1",
-    "karma-mocha": "^1.3.0",
-    "mocha": "^3.2.0",
-    "rollup": "^0.41.6",
-    "rollup-plugin-babel": "^2.7.1",
-    "rollup-plugin-commonjs": "^8.0.2",
-    "rollup-plugin-node-builtins": "^2.1.0",
-    "rollup-plugin-node-resolve": "^3.0.0"
+    "build-my-package": "^0.0.8",
+    "standard-version": "^4.4.0"
   }
 }
