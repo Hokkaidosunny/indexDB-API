@@ -1,12 +1,20 @@
 ## indexdb-api
+
 [![Build Status](https://travis-ci.org/Hokkaidosunny/indexdb-api.svg?branch=master)](https://travis-ci.org/Hokkaidosunny/indexdb-api)
 [![Coverage Status](https://coveralls.io/repos/github/Hokkaidosunny/indexdb-api/badge.svg?branch=master)](https://coveralls.io/github/Hokkaidosunny/indexdb-api?branch=master)
+
+## Install
+
+```
+yarn add indexdb-api
+```
 
 ## Usage：
 
 [see more example in `test/*.js`](https://github.com/Hokkaidosunny/indexdb-api/tree/master/test)
 
 ### db.js
+
 ```javascript
 /**
  * all the function retrun a promise
@@ -16,8 +24,7 @@
  * get all db names
  * return: [Array]
  */
-IndexDB.getDBNames();
-
+IndexDB.getDBNames()
 
 /**
  * create a db
@@ -25,7 +32,7 @@ IndexDB.getDBNames();
  * version: [Number], optional ,default to be new Date().getTime()
  * return: [IDBDatabase] a db instance
  */
-IndexDB.createDB(dbName, version);
+IndexDB.createDB(dbName, version)
 
 /**
  * open an existed db
@@ -33,8 +40,7 @@ IndexDB.createDB(dbName, version);
  * version: [Number], optional ,default to be new Date().getTime()
  * return: [IDBDatabase] a db instance
  */
-IndexDB.openDB(dbName, version);
-
+IndexDB.openDB(dbName, version)
 ```
 
 ### store.js
@@ -50,7 +56,7 @@ IndexDB.openDB(dbName, version);
      index: <Array, optional>
    }
  */
-IndexDB.createStore(opts);
+IndexDB.createStore(opts)
 /* example
 
 var opts = {
@@ -78,26 +84,25 @@ IndexDB.createStore(opts).then(() => {
 
  */
 
-
 /**
-* dbName: [String]
-* storeName: [String]
-* return: [IDBObjectStore] a store instance
-*/
-IndexDB.getStore(dbName, storeName);
+ * dbName: [String]
+ * storeName: [String]
+ * return: [IDBObjectStore] a store instance
+ */
+IndexDB.getStore(dbName, storeName)
 
 /**
  * dbName: [String]
  * storeName: [String]
  * return: [Number] the count of the store data
  */
-IndexDB.getStoreCount(dbName, storeName);
+IndexDB.getStoreCount(dbName, storeName)
 
 /**
  * clear the store data
  * store: [IDBObjectStore]
  */
-IndexDB.clearStore(store);
+IndexDB.clearStore(store)
 
 /**
  * delete a store
@@ -105,8 +110,7 @@ IndexDB.clearStore(store);
  * storeName: [String]
  * version: [Number] , optional ,default to be new Date().getTime()
  */
-IndexDB.deleteStore(dbName, storeName, version);
-
+IndexDB.deleteStore(dbName, storeName, version)
 ```
 
 ### Data.js
@@ -117,7 +121,7 @@ IndexDB.deleteStore(dbName, storeName, version);
  * storeName: [string]
  * return: [Array] return all the data
  */
-IndexDB.getAllData(dbName, storeName);
+IndexDB.getAllData(dbName, storeName)
 
 /**
  * add a data
@@ -126,7 +130,7 @@ IndexDB.getAllData(dbName, storeName);
  * data: [Object]
  * return: [Array] return all the data
  */
-IndexDB.addOneData(dbName, storeName, data);
+IndexDB.addOneData(dbName, storeName, data)
 /* example
 
 var data = {id: 1, name: 'Tom'};
@@ -143,8 +147,7 @@ IndexDB.addOneData('abc', 'users', data).then((count) => {
  * data: [Object]
  * return: [Array] return all the data
  */
-IndexDB.putOneData(dbName, storeName, data);
-
+IndexDB.putOneData(dbName, storeName, data)
 
 /**
  * get data by index
@@ -153,7 +156,7 @@ IndexDB.putOneData(dbName, storeName, data);
  * indexName: [string]
  * value: [any]
  */
-IndexDB.getDataByIndex(dbName, storeName, indexName, value);
+IndexDB.getDataByIndex(dbName, storeName, indexName, value)
 /* example
 IndexDB.getDataByIndex('abc', 'users', 'idIndex', 1).then((data) => {
   console.log('the data is' + data);
@@ -167,7 +170,7 @@ IndexDB.getDataByIndex('abc', 'users', 'idIndex', 1).then((data) => {
  * start: [string]
  * end: [any]
  */
-IndexDB.getRangeDataByPrimaryKey(dbName, storeName, start, end);
+IndexDB.getRangeDataByPrimaryKey(dbName, storeName, start, end)
 /* example
 db: [
   {
@@ -184,6 +187,6 @@ IndexDB.getRangeDataByPrimaryKey('abc', 'users', 1, 2).then((dataArr) => {
   console.log('the data is' + dataArr);
 });
 */
-
 ```
+
 > ….to be continue

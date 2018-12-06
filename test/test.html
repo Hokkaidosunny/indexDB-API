@@ -1,27 +1,27 @@
 <!DOCTYPE html>
 <html>
-<head>
-	<title>test</title>
-	<meta charset="utf-8"/>
-	<link rel="stylesheet" href="../node_modules/mocha/mocha.css" />
-</head>
-<body>
-	<div id="mocha"></div>
-  <script src="../node_modules/mocha/mocha.js"></script>
-	<script src="../node_modules/chai/chai.js"></script>
+  <head>
+    <title>test</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../node_modules/mocha/mocha.css" />
+  </head>
+  <body>
+    <div id="mocha"></div>
+    <script src="../node_modules/mocha/mocha.js"></script>
+    <script src="../node_modules/chai/chai.js"></script>
 
-	<script src="../dist/indexdb.bundle.js" data-cover></script><!--需要测试的文件-->
+    <script src="../dist/index.js" data-cover></script>
 
-	<script src="./db.js"></script><!--测试用例-->
-	<script src="./store.js"></script><!--测试用例-->
-  <script src="./data.js"></script><!--测试用例-->
+    <script src="./db.js"></script>
+    <script src="./store.js"></script>
+    <script src="./data.js"></script>
 
-	<script>
-		if (window.mochaPhantomJS) {
-			mochaPhantomJS.run();
-		} else {
-			mocha.run();
-	  }
-	</script>
-</body>
+    <script>
+      if (window.mochaPhantomJS) {
+        mochaPhantomJS.run()
+      } else {
+        mocha.run()
+      }
+    </script>
+  </body>
 </html>
