@@ -1,10 +1,10 @@
-import showError from './showError'
 import * as db from './db'
 import * as data from './data'
 import * as store from './store'
+import { showErrorMsg } from './util'
 
 if (!window.indexedDB) {
-  showError('Your browser doesnt support indexedDB.')
+  showErrorMsg('Your browser doesnt support indexedDB.')
 }
 
 export default {
