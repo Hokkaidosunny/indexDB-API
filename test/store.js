@@ -1,4 +1,4 @@
-describe('store.js', function(){
+describe('store.js', function() {
   // //clear dbs
   // describe('deleteDB(\'abc\')', function() {
   //   it('should return undefined', function() {
@@ -19,7 +19,7 @@ describe('store.js', function(){
   // });
 
   describe('createStore(options)', function() {
-    it('should create store named \'users\'and return it', function() {
+    it("should create store named 'users'and return it", function() {
       var options = {
         dbName: 'abc',
         storeName: 'users',
@@ -27,42 +27,44 @@ describe('store.js', function(){
           keyPath: 'id', //主键
           autoIncrement: false //是否自增长
         },
-        index: [  //索引项
+        index: [
+          //索引项
           {
             indexName: 'idIndex',
             indexKey: 'id',
             indexOptions: { unqiue: false, mulitEntry: false }
-          }, {
+          },
+          {
             indexName: 'nameIndex',
             indexKey: 'name',
             indexOptions: { unqiue: false, mulitEntry: false }
           }
         ]
-      };
+      }
 
-      return IndexDB.createStore(options).then(function(store){
-        expect(store instanceof IDBObjectStore).equal(true);
-        expect(store.name).equal('users');
-      });
-    });
-  });
+      return IndexDB.createStore(options).then(function(store) {
+        expect(store instanceof IDBObjectStore).equal(true)
+        expect(store.name).equal('users')
+      })
+    })
+  })
 
-  describe('getStore(\'abc\', \'users\')', function(){
+  describe("getStore('abc', 'users')", function() {
     it('should return store', function() {
       return IndexDB.getStore('abc', 'users').then(function(store) {
-        expect(store instanceof IDBObjectStore).equal(true);
-        expect(store.name).equal('users');
-      });
-    });
-  });
-
-  describe('getStoreCount(\'abc\', \'users\')', function(){
-    it('should return store count', function(){
-      return IndexDB.getStoreCount('abc', 'users').then(function(count) {
-        expect(typeof count).equal('number');
-      });
+        expect(store instanceof IDBObjectStore).equal(true)
+        expect(store.name).equal('users')
+      })
     })
-  });
+  })
+
+  describe("getStoreCount('abc', 'users')", function() {
+    it('should return store count', function() {
+      return IndexDB.getStoreCount('abc', 'users').then(function(count) {
+        expect(typeof count).equal('number')
+      })
+    })
+  })
 
   // describe('deleteStore(\'abc\', \'users\')', function(){
   //   it('should delete store \'users\' and return db \'abc\'', function() {
@@ -72,5 +74,4 @@ describe('store.js', function(){
   //     });
   //   });
   // });
-
-});
+})

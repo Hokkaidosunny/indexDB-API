@@ -48,13 +48,12 @@ function closeDB(dbName) {
  * @param {string} dbName
  */
 function deleteDB(dbName) {
+  closeDB(dbName)
+
   return new Promise((resolve, reject) => {
     const dbConnect = indexedDB.deleteDatabase(dbName)
 
-    dbConnect.onsuccess = () => {
-      delete DBs[dbName]
-      resolve()
-    }
+    dbConnect.onsuccess = resolve
 
     dbConnect.onerror = reject
   })
@@ -74,22 +73,4 @@ function getDB(dbName) {
   }
 }
 
-/**
- * get all dbnames
- * @return {[type]} [description]
- */
-function getDBNames() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.webkitGetDatabaseNames()
-
-    req.onsuccess = event => {
-      const dbNames = [...event.target.result]
-
-      resolve(dbNames)
-    }
-
-    req.onerror = reject
-  })
-}
-
-export { DBs, openDB, closeDB, getDB, deleteDB, getDBNames }
+export { DBs, openDB, closeDB, getDB, deleteDB }
