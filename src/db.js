@@ -1,62 +1,77 @@
-import showError from './showError.js'
+import { timeStamp } from './util'
 
-//cache
+/**
+ * DB pool
+ */
 const DBs = {}
 
 /**
- * create a new db
+ * create/open a new DB
+ * @param {*} dbName
+ * @param {*} version
  */
-function createDB(dbName, version = new Date().getTime()) {
+function openDB(dbName, listener = {}, version = timeStamp()) {
+  const { onupgradeneeded } = listener
+
+  closeDB(dbName)
+
   return new Promise((resolve, reject) => {
-    const dbConnect = window.indexedDB.open(dbName, version)
-    dbConnect.onsuccess = event => {
-      //save the opened db
-      DBs[dbName] = event.target.result
+    const req = indexedDB.open(dbName, version)
+
+    req.onsuccess = event => {
+      DBs[dbName] = event.target.result //save the opened db
+
       resolve(event.target.result)
     }
-    dbConnect.onerror = event => {
-      showError(event.target.error.message)
-      reject(event.target.error)
-    }
+
+    req.onupgradeneeded = onupgradeneeded
+
+    req.onerror = reject
   })
 }
 
 /**
- * delete a existed db
+ * close a DB
+ * @param {*} dbName
+ */
+function closeDB(dbName) {
+  const curDB = DBs[dbName]
+
+  if (curDB) {
+    curDB.close()
+    delete DBs[dbName]
+  }
+}
+
+/**
+ * delete a DB
+ * @param {string} dbName
  */
 function deleteDB(dbName) {
   return new Promise((resolve, reject) => {
-    const dbConnect = window.indexedDB.deleteDatabase(dbName)
+    const dbConnect = indexedDB.deleteDatabase(dbName)
+
     dbConnect.onsuccess = () => {
+      delete DBs[dbName]
       resolve()
     }
-    dbConnect.onerror = event => {
-      showError(event.target.error.message)
-      reject(event.target.error)
-    }
+
+    dbConnect.onerror = reject
   })
 }
 
 /**
- * open an existed db
+ * get DB from DBs
+ * @param {string} dbName
  */
 function getDB(dbName) {
-  return new Promise((resolve, reject) => {
-    //get db from cache
-    if (DBs[dbName]) {
-      resolve(DBs[dbName])
-      return
-    }
+  const curDB = DBs[dbName]
 
-    //get db from connect
-    createDB(dbName)
-      .then(db => {
-        resolve(db)
-      })
-      .catch(error => {
-        reject(error)
-      })
-  })
+  if (curDB) {
+    return curDB
+  } else {
+    throw new Error(`please open ${dbName} DB first`)
+  }
 }
 
 /**
@@ -65,23 +80,16 @@ function getDB(dbName) {
  */
 function getDBNames() {
   return new Promise((resolve, reject) => {
-    if (!window.indexedDB.webkitGetDatabaseNames) {
-      showError('your browser doesnt support indexedDB.webkitGetDatabaseNames')
-      resolve([])
-      return
-    }
-    const get_dbNames_req = window.indexedDB.webkitGetDatabaseNames()
+    const req = indexedDB.webkitGetDatabaseNames()
 
-    get_dbNames_req.onsuccess = event => {
-      const dbNames = Array.prototype.slice.call(event.target.result)
+    req.onsuccess = event => {
+      const dbNames = [...event.target.result]
+
       resolve(dbNames)
     }
 
-    get_dbNames_req.onerror = event => {
-      showError(event.target.error.message)
-      reject(event.target.error)
-    }
+    req.onerror = reject
   })
 }
 
-export { DBs, getDBNames, createDB, getDB, deleteDB }
+export { DBs, openDB, closeDB, getDB, deleteDB, getDBNames }

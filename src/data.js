@@ -1,250 +1,129 @@
-import showError from './showError.js'
-import { getDB } from './db.js'
+import { getStore } from './store'
 
 /**
- * [getAllData description]
- * @param  {[type]} store [description]
- * @return {[type]}       [description]
+ * getAllData
+ * @param {*} dbName
+ * @param {*} storeName
  */
 function getAllData(dbName, storeName) {
+  const store = getStore(dbName, storeName)
+
   return new Promise((resolve, reject) => {
-    getDB(dbName)
-      .then(db => {
-        if (!isStoreNameCorrect(db, storeName)) {
-          reject()
-        }
+    const dataArr = []
 
-        const tx = db.transaction(storeName, 'readwrite')
-        const store = tx.objectStore(storeName)
+    const req = store.openCursor()
 
-        tx.oncomplete = function() {
-          resolve(dataArr)
-        }
+    req.onsuccess = event => {
+      const cursor = event.target.result
 
-        const req = store.openCursor()
-        const dataArr = []
+      if (cursor) {
+        dataArr.push(cursor.value)
+        cursor.continue()
+      } else {
+        resolve(dataArr)
+      }
+    }
 
-        req.onsuccess = event => {
-          const cursor = event.target.result
-          if (cursor) {
-            dataArr.push(cursor.value)
-            cursor.continue()
-          }
-        }
-
-        req.onerror = event => {
-          showError(event.target.error.message)
-          reject(event.target.error)
-        }
-      })
-      .catch(error => {
-        reject(error)
-      })
+    req.onerror = reject
   })
 }
 
 /**
- * [getDataByIndex description]
- * @param  {[type]} store     [description]
- * @param  {[type]} indexName [description]
- * @param  {[type]} value     [description]
- * @return {[type]}           [description]
+ * getDataByIndex
+ * @param {*} dbName
+ * @param {*} storeName
+ * @param {*} indexName
+ * @param {*} value
  */
 function getDataByIndex(dbName, storeName, indexName, value) {
+  const store = getStore(dbName, storeName)
+
   return new Promise((resolve, reject) => {
-    getDB(dbName)
-      .then(db => {
-        if (!isStoreNameCorrect(db, storeName)) {
-          reject()
-        }
+    const index = store.index(indexName)
 
-        const tx = db.transaction(storeName, 'readwrite')
-        const store = tx.objectStore(storeName)
+    const req = index.get(value)
 
-        tx.oncomplete = function() {
-          resolve(data)
-        }
+    req.onsuccess = event => {
+      resolve(event.target.result)
+    }
 
-        const index = store.index(indexName)
-        const req = index.get(value)
-        let data
-
-        req.onsuccess = event => {
-          data = event.target.result
-        }
-
-        req.onerror = event => {
-          showError(event.target.error.message)
-          reject(event.target.error)
-        }
-      })
-      .catch(error => {
-        reject(error)
-      })
+    req.onerror = reject
   })
 }
 
 /**
- * 用主键获取指定对象库的范围数据
+ * getRangeDataByPrimaryKey
  */
 function getRangeDataByPrimaryKey(dbName, storeName, start, end) {
+  const store = getStore(dbName, storeName)
+
   return new Promise((resolve, reject) => {
-    getDB(dbName)
-      .then(db => {
-        if (!isStoreNameCorrect(db, storeName)) {
-          reject()
-        }
+    const range = IDBKeyRange.bound(start, end)
 
-        const tx = db.transaction(storeName, 'readwrite')
-        const store = tx.objectStore(storeName)
+    const dataArr = []
 
-        tx.oncomplete = function() {
-          resolve(dataArr)
-        }
+    const req = store.openCursor(range)
 
-        const range = IDBKeyRange.bound(start, end)
-        const dataArr = []
-        const req = store.openCursor(range)
+    req.onsuccess = event => {
+      const cursor = event.target.result
 
-        req.onsuccess = event => {
-          const cursor = event.target.result
-          if (cursor) {
-            dataArr.push(cursor.value)
-            cursor.continue()
-          }
-        }
+      if (cursor) {
+        dataArr.push(cursor.value)
+        cursor.continue()
+      } else {
+        resolve(dataArr)
+      }
+    }
 
-        req.onerror = event => {
-          showError(event.target.error.message)
-          reject(event.target.error)
-        }
-      })
-      .catch(error => {
-        reject(error)
-      })
+    req.onerror = reject
   })
 }
 
 /**
  * addOneData
  */
-
 function addOneData(dbName, storeName, data) {
+  const store = getStore(dbName, storeName)
+
   return new Promise((resolve, reject) => {
-    getDB(dbName)
-      .then(db => {
-        if (!isStoreNameCorrect(db, storeName)) {
-          reject()
-        }
+    const req = store.add(data)
 
-        const tx = db.transaction(storeName, 'readwrite')
-        const store = tx.objectStore(storeName)
-
-        tx.oncomplete = function() {
-          resolve(count)
-        }
-
-        const add_data_req = store.add(data)
-        let count
-
-        add_data_req.onsuccess = event => {
-          //event.target.result is the count of the data
-          count = event.target.result
-        }
-        add_data_req.onerror = event => {
-          showError(event.target.error.message)
-          reject(event.target.error)
-        }
-      })
-      .catch(error => {
-        reject(error)
-      })
+    req.onsuccess = event => {
+      // event.target.result is the count of the data
+      resolve(event.target.result)
+    }
+    req.onerror = reject
   })
 }
 
 /**
+ * putOneData
  * update a data accoring to the primary key
  * you can use putOneData to add a data, when the primary is the same, then putOneData will update the old data
  */
 function putOneData(dbName, storeName, data) {
+  const store = getStore(dbName, storeName)
+
   return new Promise((resolve, reject) => {
-    getDB(dbName)
-      .then(db => {
-        if (!isStoreNameCorrect(db, storeName)) {
-          reject()
-        }
+    const req = store.put(data)
 
-        const tx = db.transaction(storeName, 'readwrite')
-        const store = tx.objectStore(storeName)
+    req.onsuccess = event => {
+      resolve(event.target.result)
+    }
 
-        tx.oncomplete = function() {
-          resolve(count)
-        }
-
-        const put_data_req = store.put(data)
-        let count
-
-        put_data_req.onsuccess = event => {
-          count = event.target.result
-        }
-        put_data_req.onerror = event => {
-          showError(event.target.error.message)
-          reject(event.target.error)
-        }
-      })
-      .catch(error => {
-        reject(error)
-      })
+    req.onerror = reject
   })
 }
 
 /**
- * 按主键删除数据
+ * deleteDataByPrimaKey
  */
 function deleteDataByPrimaKey(dbName, storeName, primaryKeyValue) {
-  return new Promise((resolve, reject) => {
-    getDB(dbName)
-      .then(db => {
-        if (!isStoreNameCorrect(db, storeName)) {
-          reject()
-        }
+  const store = getStore(dbName, storeName)
 
-        const tx = db.transaction(storeName, 'readwrite')
-        const store = tx.objectStore(storeName)
+  store.delete(primaryKeyValue)
 
-        tx.oncomplete = function() {
-          resolve(true)
-        }
-
-        store.delete(primaryKeyValue)
-      })
-      .catch(error => {
-        reject(error)
-      })
-  })
-}
-
-/**
- * check store
- * @param  {[type]}  store [description]
- * @return {Boolean}       [description]
- */
-function isStoreInstance(store) {
-  if (!(store instanceof IDBObjectStore)) {
-    showError('store parameter should be an instance of IDBObjectStore')
-    return false
-  } else {
-    return true
-  }
-}
-
-function isStoreNameCorrect(db, storeName) {
-  if (db.objectStoreNames.contains(storeName)) {
-    return true
-  } else {
-    showError(`store ${storeName} doesn't existes`)
-    return false
-  }
+  return
 }
 
 export {
@@ -253,6 +132,5 @@ export {
   getRangeDataByPrimaryKey,
   addOneData,
   putOneData,
-  deleteDataByPrimaKey,
-  isStoreInstance
+  deleteDataByPrimaKey
 }
