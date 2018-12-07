@@ -123,7 +123,10 @@ function getStoreCount(dbName, storeName) {
 function clearStore(dbName, storeName) {
   const store = getStore(dbName, storeName)
 
-  return store.clear()
+  if (store) {
+    store.clear()
+    return true
+  }
 }
 
 export { getStore, createStore, getStoreCount, deleteStore, clearStore }

@@ -121,9 +121,10 @@ function putOneData(dbName, storeName, data) {
 function deleteDataByPrimaKey(dbName, storeName, primaryKeyValue) {
   const store = getStore(dbName, storeName)
 
-  store.delete(primaryKeyValue)
-
-  return
+  if (store) {
+    store.delete(primaryKeyValue)
+    return true
+  }
 }
 
 export {

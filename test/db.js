@@ -4,7 +4,7 @@ var getType = Object.prototype.toString
 mocha.ui('bdd')
 
 describe('db.js', function() {
-  describe("createDB('abc')", () => {
+  describe("openDB('abc')", () => {
     it("should return a IDBDatabase instance named 'abc'", () => {
       return IndexDB.openDB('abc').then(db => {
         expect(db instanceof IDBDatabase).equal(true)
@@ -19,6 +19,13 @@ describe('db.js', function() {
 
       expect(db instanceof IDBDatabase).equal(true)
       expect(db.name).equal('abc')
+    })
+  })
+
+  describe("closeDB('abc')", function() {
+    it('should delete DB abc', () => {
+      IndexDB.deleteDB('abc')
+      expect(IndexDB.DBs['abc']).equal(undefined)
     })
   })
 
