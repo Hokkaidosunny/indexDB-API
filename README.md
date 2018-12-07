@@ -13,7 +13,30 @@ yarn add indexdb-api
 
 [see more example in `test/*.js`](https://github.com/Hokkaidosunny/indexdb-api/tree/master/test)
 
-### db.js
+## DB
+
+- DBs
+- openDB
+- closeDB
+- getDB
+- deleteDB
+
+## Store
+
+- getStore
+- createStore
+- getStoreCount
+- deleteStore
+- clearStore
+
+## Data
+
+- getAllData
+- getDataByIndex
+- getRangeDataByPrimaryKey
+- addOneData
+- putOneData
+- deleteDataByPrimaKey
 
 ```javascript
 /**

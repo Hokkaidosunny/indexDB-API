@@ -15,9 +15,7 @@ describe('data.js', function() {
       return deleteDB('abc')
         .then(() => openDB('abc'))
         .then(() =>
-          createStore({
-            dbName: 'abc',
-            storeName: 'users',
+          createStore('abc', 'users', {
             keyOptions: {
               keyPath: 'id',
               autoIncrement: false
@@ -90,8 +88,9 @@ describe('data.js', function() {
 
   describe('deleteDataByPrimaKey(dbName, storeName, primaryKeyValue) : delete data by primaryKeyValue', function() {
     it('should return bool', function() {
-      const res = deleteDataByPrimaKey('abc', 'users', 1)
-      expect(res).equal(true)
+      return deleteDataByPrimaKey('abc', 'users', 1).then(res => {
+        expect(res).equal(true)
+      })
     })
   })
 })

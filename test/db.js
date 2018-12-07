@@ -15,17 +15,18 @@ describe('db.js', function() {
 
   describe("getDB('abc')", function() {
     it("should return a IDBDatabase instance named 'abc'", () => {
-      const db = IndexDB.getDB('abc')
-
-      expect(db instanceof IDBDatabase).equal(true)
-      expect(db.name).equal('abc')
+      return IndexDB.getDB('abc').then(db => {
+        expect(db instanceof IDBDatabase).equal(true)
+        expect(db.name).equal('abc')
+      })
     })
   })
 
   describe("closeDB('abc')", function() {
     it('should delete DB abc', () => {
-      IndexDB.deleteDB('abc')
-      expect(IndexDB.DBs['abc']).equal(undefined)
+      return IndexDB.deleteDB('abc').then(() => {
+        expect(IndexDB.DBs['abc']).equal(undefined)
+      })
     })
   })
 

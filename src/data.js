@@ -5,8 +5,8 @@ import { getStore } from './store'
  * @param {*} dbName
  * @param {*} storeName
  */
-function getAllData(dbName, storeName) {
-  const store = getStore(dbName, storeName)
+async function getAllData(dbName, storeName) {
+  const store = await getStore(dbName, storeName)
 
   return new Promise((resolve, reject) => {
     const dataArr = []
@@ -35,8 +35,8 @@ function getAllData(dbName, storeName) {
  * @param {*} indexName
  * @param {*} value
  */
-function getDataByIndex(dbName, storeName, indexName, value) {
-  const store = getStore(dbName, storeName)
+async function getDataByIndex(dbName, storeName, indexName, value) {
+  const store = await getStore(dbName, storeName)
 
   return new Promise((resolve, reject) => {
     const index = store.index(indexName)
@@ -54,8 +54,8 @@ function getDataByIndex(dbName, storeName, indexName, value) {
 /**
  * getRangeDataByPrimaryKey
  */
-function getRangeDataByPrimaryKey(dbName, storeName, start, end) {
-  const store = getStore(dbName, storeName)
+async function getRangeDataByPrimaryKey(dbName, storeName, start, end) {
+  const store = await getStore(dbName, storeName)
 
   return new Promise((resolve, reject) => {
     const range = IDBKeyRange.bound(start, end)
@@ -82,8 +82,8 @@ function getRangeDataByPrimaryKey(dbName, storeName, start, end) {
 /**
  * addOneData
  */
-function addOneData(dbName, storeName, data) {
-  const store = getStore(dbName, storeName)
+async function addOneData(dbName, storeName, data) {
+  const store = await getStore(dbName, storeName)
 
   return new Promise((resolve, reject) => {
     const req = store.add(data)
@@ -101,8 +101,8 @@ function addOneData(dbName, storeName, data) {
  * update a data accoring to the primary key
  * you can use putOneData to add a data, when the primary is the same, then putOneData will update the old data
  */
-function putOneData(dbName, storeName, data) {
-  const store = getStore(dbName, storeName)
+async function putOneData(dbName, storeName, data) {
+  const store = await getStore(dbName, storeName)
 
   return new Promise((resolve, reject) => {
     const req = store.put(data)
@@ -118,11 +118,12 @@ function putOneData(dbName, storeName, data) {
 /**
  * deleteDataByPrimaKey
  */
-function deleteDataByPrimaKey(dbName, storeName, primaryKeyValue) {
-  const store = getStore(dbName, storeName)
+async function deleteDataByPrimaKey(dbName, storeName, primaryKeyValue) {
+  const store = await getStore(dbName, storeName)
 
   if (store) {
     store.delete(primaryKeyValue)
+
     return true
   }
 }

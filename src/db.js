@@ -40,6 +40,10 @@ function closeDB(dbName) {
   if (curDB) {
     curDB.close()
     delete DBs[dbName]
+
+    return Promise.resolve(true)
+  } else {
+    return Promise.resolve()
   }
 }
 
@@ -47,8 +51,8 @@ function closeDB(dbName) {
  * delete a DB
  * @param {string} dbName
  */
-function deleteDB(dbName) {
-  closeDB(dbName)
+async function deleteDB(dbName) {
+  await closeDB(dbName)
 
   return new Promise((resolve, reject) => {
     const dbConnect = indexedDB.deleteDatabase(dbName)
@@ -67,9 +71,9 @@ function getDB(dbName) {
   const curDB = DBs[dbName]
 
   if (curDB) {
-    return curDB
+    return Promise.resolve(curDB)
   } else {
-    throw new Error(`please open ${dbName} DB first`)
+    return Promise.reject(new Error(`please open ${dbName} DB first`))
   }
 }
 

@@ -4,17 +4,12 @@ import { getDB, openDB } from './db'
 /**
  * create a new store in an existed db
  */
-async function createStore({
+async function createStore(
   dbName,
   storeName,
-  version = timeStamp(),
-  keyOptions = {},
-  indexes = []
-}) {
-  if (!dbName || !storeName) {
-    return false
-  }
-
+  { keyOptions = {}, indexes = [] },
+  version = timeStamp()
+) {
   let store
 
   await openDB(
@@ -46,21 +41,21 @@ async function createStore({
  * @param {string} dbName
  * @param {string} storeName
  */
-function getStore(dbName, storeName) {
-  if (!dbName || !storeName) {
-    return false
-  }
+async function getStore(dbName, storeName) {
+  const curDB = await getDB(dbName)
 
-  const curDB = getDB(dbName)
+  return new Promise((resolve, reject) => {
+    if (curDB.objectStoreNames.contains(storeName)) {
+      // you should create transaction before do anything to store
+      const transaction = curDB.transaction(storeName, 'readwrite')
 
-  if (curDB.objectStoreNames.contains(storeName)) {
-    // you should create transaction before do anything to store
-    const transaction = curDB.transaction(storeName, 'readwrite')
+      const store = transaction.objectStore(storeName)
 
-    const store = transaction.objectStore(storeName)
-
-    return store
-  }
+      resolve(store)
+    } else {
+      reject(new Error('no this store'))
+    }
+  })
 }
 
 /**
@@ -70,10 +65,6 @@ function getStore(dbName, storeName) {
  * @param {*} version
  */
 async function deleteStore(dbName, storeName, version = timeStamp()) {
-  if (!dbName || !storeName) {
-    return false
-  }
-
   await openDB(
     dbName,
     {
@@ -96,12 +87,8 @@ async function deleteStore(dbName, storeName, version = timeStamp()) {
  * @param {*} dbName
  * @param {*} storeName
  */
-function getStoreCount(dbName, storeName) {
-  if (!dbName || !storeName) {
-    return false
-  }
-
-  const store = getStore(dbName, storeName)
+async function getStoreCount(dbName, storeName) {
+  const store = await getStore(dbName, storeName)
 
   return new Promise((resolve, reject) => {
     const req = store.count()
@@ -120,11 +107,12 @@ function getStoreCount(dbName, storeName) {
  * @param {*} dbName
  * @param {*} storeName
  */
-function clearStore(dbName, storeName) {
-  const store = getStore(dbName, storeName)
+async function clearStore(dbName, storeName) {
+  const store = await getStore(dbName, storeName)
 
   if (store) {
     store.clear()
+
     return true
   }
 }
