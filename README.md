@@ -1,5 +1,7 @@
 ## indexdb-api
 
+indexedDB with simple api(all promised), make it easy to use
+
 [![Build Status](https://travis-ci.org/Hokkaidosunny/indexdb-api.svg?branch=master)](https://travis-ci.org/Hokkaidosunny/indexdb-api)
 [![Coverage Status](https://coveralls.io/repos/github/Hokkaidosunny/indexdb-api/badge.svg?branch=master)](https://coveralls.io/github/Hokkaidosunny/indexdb-api?branch=master)
 
@@ -38,178 +40,161 @@ yarn add indexdb-api
 - putOneData
 - deleteDataByPrimaKey
 
-```javascript
-/**
- * all the function retrun a promise
- */
+### DBs
 
-/**
- * get all db names
- * return: [Array]
- */
-IndexDB.getDBNames()
+db pool, cache all opened db
 
-/**
- * create a db
- * dbName: [String]
- * version: [Number], optional ,default to be new Date().getTime()
- * return: [IDBDatabase] a db instance
- */
-IndexDB.createDB(dbName, version)
+```
+import { DBs } from 'index-api'
 
-/**
- * open an existed db
- * dbName: [String]
- * version: [Number], optional ,default to be new Date().getTime()
- * return: [IDBDatabase] a db instance
- */
-IndexDB.openDB(dbName, version)
+const db = DBs['myDB']
 ```
 
-### store.js
+### `openDB(dbName: string, version?: number)`
+
+create or open a db
+
+```
+import { openDB } from 'index-api'
+
+openDB('myDB').then(db => {
+
+})
+```
+
+### `closeDB(dbName: string)`
+
+close a db
+
+### `getDB(dbName: string)`
+
+get a db
+
+### `deleteDB(dbName: string)`
+
+delete a db
+
+### `getStore(dbName: string, storeName: string)`
+
+get a store
+
+### `createStore(dbName: string, storeName: string, options?: any, version?: number)`
+
+creat a store
 
 ```javascript
-/**
- * create a store
- * opts = {
-     dbName: <String>,
-     storeName: <String>,
-     version: <Number, optional>,
-     keyOptions: <Object, optional>,
-     index: <Array, optional>
-   }
- */
-IndexDB.createStore(opts)
-/* example
+import { createStore } from 'index-api'
 
-var opts = {
-  dbName: 'abc',
-  storeName: 'users',
+createStore('myDB', 'users', {
   keyOptions: {
-    keyPath: 'id', //primary key
-    autoIncrement: false, //auto increment
+    keyPath: 'id',
+    autoIncrement: false
   },
-  index: [  //index, use for query the data
+  indexes: [
     {
       indexName: 'idIndex',
       indexKey: 'id',
       indexOptions: { unqiue: false, mulitEntry: false }
-    }, {
+    },
+    {
       indexName: 'nameIndex',
       indexKey: 'name',
       indexOptions: { unqiue: false, mulitEntry: false }
     }
   ]
-};
-IndexDB.createStore(opts).then(() => {
-  console.log('success');
 })
-
- */
-
-/**
- * dbName: [String]
- * storeName: [String]
- * return: [IDBObjectStore] a store instance
- */
-IndexDB.getStore(dbName, storeName)
-
-/**
- * dbName: [String]
- * storeName: [String]
- * return: [Number] the count of the store data
- */
-IndexDB.getStoreCount(dbName, storeName)
-
-/**
- * clear the store data
- * store: [IDBObjectStore]
- */
-IndexDB.clearStore(store)
-
-/**
- * delete a store
- * dbName: [String]
- * storeName: [String]
- * version: [Number] , optional ,default to be new Date().getTime()
- */
-IndexDB.deleteStore(dbName, storeName, version)
 ```
 
-### Data.js
+### `getStoreCount(dbName: string, storeName: string)`
+
+get all data count in a store
+
+### `deleteStore(dbName: string, storeName: string)`
+
+delete a store
+
+### `clearStore(dbName: string, storeName: string)`
+
+clear all data in a store
+
+### `getAllData(dbName: string, storeName: string)`
+
+get all data in a store
 
 ```javascript
-/**
- * dbName: [string]
- * storeName: [string]
- * return: [Array] return all the data
- */
-IndexDB.getAllData(dbName, storeName)
+import { getAllData } from 'index-api'
 
-/**
- * add a data
- * dbName: [string]
- * storeName: [string]
- * data: [Object]
- * return: [Array] return all the data
- */
-IndexDB.addOneData(dbName, storeName, data)
-/* example
-
-var data = {id: 1, name: 'Tom'};
-IndexDB.addOneData('abc', 'users', data).then((count) => {
-  console.log('saved! now the data count is ' + count);
-})
-
-*/
-
-/**
- * update a data according to the primary key
- * dbName: [string]
- * storeName: [string]
- * data: [Object]
- * return: [Array] return all the data
- */
-IndexDB.putOneData(dbName, storeName, data)
-
-/**
- * get data by index
- * dbName: [string]
- * storeName: [string]
- * indexName: [string]
- * value: [any]
- */
-IndexDB.getDataByIndex(dbName, storeName, indexName, value)
-/* example
-IndexDB.getDataByIndex('abc', 'users', 'idIndex', 1).then((data) => {
-  console.log('the data is' + data);
-});
-*/
-
-/**
- * get range data by primary key
- * dbName: [string]
- * storeName: [string]
- * start: [string]
- * end: [any]
- */
-IndexDB.getRangeDataByPrimaryKey(dbName, storeName, start, end)
-/* example
-db: [
-  {
-    id: 1,  //primary key
-    name: 'Tom',
-    age: 20
-  }, {
-    id: 2,
-    name: 'Jerry',
-    age: 21
-  }
-]
-IndexDB.getRangeDataByPrimaryKey('abc', 'users', 1, 2).then((dataArr) => {
-  console.log('the data is' + dataArr);
-});
-*/
+getAllData('myDB', 'users').then(allData => {})
 ```
 
-> ….to be continue
+### `getDataByIndex(dbName: string, storeName: string, indexName: string, value: any)`
+
+get a data by index setted before
+
+```javascript
+import { getDataByIndex, createStore } from 'index-api'
+
+// assume we have tom in store
+var tom = {
+  id: 1,
+  name: 'Tom',
+  age: 26
+}
+
+// and create store with id index
+createStore('myDB', 'users', {
+  keyOptions: {
+    keyPath: 'id', // primary key
+    autoIncrement: false
+  },
+  indexes: [
+    {
+      indexName: 'idIndex',
+      indexKey: 'id',
+      indexOptions: { unqiue: false, mulitEntry: false }
+    }
+  ]
+})
+
+// how we get tom
+getDataByIndex('myDB', 'users', 'idIndex', 1).then(data => {
+  expect(data.name).equal('Tom')
+})
+```
+
+### `getRangeDataByPrimaryKey(dbName: string, storeName: string, start: number, end: number)`
+
+```javascript
+import { getRangeDataByPrimaryKey } from 'index-api'
+
+// assume we have this store
+// id is the primary key
+var store = [
+  {
+    id: 1,
+    name: 'Tom',
+    age: 26
+  },
+  {
+    id: 2,
+    name: 'Xx',
+    age: 26
+  }
+]
+
+getRangeDataByPrimaryKey('myDB', 'users', 1, 2).then(allData => {
+  // allData === store
+})
+```
+
+### `addOneData(dbName: string, storeName: string, data: any)`
+
+insert a data
+
+### `putOneData(dbName: string, storeName: string, data: any)`
+
+update a data
+
+### `deleteDataByPrimaKey(dbName: string, storeName: string, primaryKeyValue: any)`
+
+delete a data by primary key
