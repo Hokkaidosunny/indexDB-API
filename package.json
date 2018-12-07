@@ -1,6 +1,6 @@
 {
   "name": "indexdb-api",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "indexdb simple api",
   "main": "dist/index.js",
   "scripts": {
