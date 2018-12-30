@@ -3,7 +3,7 @@ import * as data from './data'
 import * as store from './store'
 import { showErrorMsg } from './util'
 
-if (!window.indexedDB) {
+if (!self.indexedDB) {
   showErrorMsg('Your browser doesnt support indexedDB.')
 }
 
