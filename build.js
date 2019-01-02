@@ -5,7 +5,6 @@ const { buildUMD } = buidMyPackage
 
 buildUMD({
   entry: path.join(__dirname, './src/index.js'),
-  mode: 'development',
   library: 'IndexDB',
   filename: 'index.js'
 })
